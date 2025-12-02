@@ -1,0 +1,13 @@
+# macOS Finder files
+.DS_Store
+
+# Python cache
+__pycache__/
+.pytest_cache/
+
+# Virtual environments
+venv/
+.env/
+
+# VS Code settings (optional)
+.vscode/
