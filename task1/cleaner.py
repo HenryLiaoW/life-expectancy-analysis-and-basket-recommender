@@ -7,3 +7,7 @@ def clean_numeric(value: str):
         return float(value)
     except (ValueError, TypeError):  #"abc"-ValueError;"[]"-TypeError
         return None
+
+def clean_row(row: dict):
+    """Clean a single CSV row (NOT IMPLEMENTED YET — TDD RED PHASE)."""
+    pass
