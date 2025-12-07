@@ -81,3 +81,15 @@ def clean_row(row: dict):
         cleaned[key] = value
 
     return cleaned
+
+
+    # ============================
+    # 3. dataset-level cleaning
+    # ============================
+
+def clean_dataset(rows):
+    """
+    Clean a whole dataset (list of dict rows).
+    Returns a new list of cleaned rows.
+    """
+    return [clean_row(r) for r in rows]
