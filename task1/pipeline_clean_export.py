@@ -118,6 +118,17 @@ def export_cleaned_dataset(
 
     # --- Step 3: Clean all rows ---
     cleaned_rows = [clean_row(row) for row in rows]
+    missing_rate, low_missing, mid_missing, high_missing = analyse_missing_rates(cleaned_rows)
+    
+    log_info("Missing rate analysis:")
+    for field, rate in sorted(missing_rate.items(), key=lambda x: x[1], reverse=True):
+        print(f"   {field}: {rate:.1%}")
+
+    print("\n[INFO] Variable groups based on missing rate:")
+    print(f"   Low missing (≤10%): {low_missing}")
+    print(f"   Mid missing (10–40%): {mid_missing}")
+    print(f"   High missing (>40%): {high_missing}")
+
     log_info(f"Successfully cleaned {len(cleaned_rows)} rows.")
 
     # --- Step 4: Missing-value summary ---
@@ -134,6 +145,48 @@ def export_cleaned_dataset(
         writer.writerows(cleaned_rows)
 
     log_info(f"Cleaned dataset exported to: {output_path}")
+
+
+
+
+# --------------------------------------------------------------------
+# Additional analysis function (not part of main pipeline)
+# --------------------------------------------------------------------
+def analyse_missing_rates(cleaned_rows):
+    """
+    Analyse missing rate (%) for each field and classify them
+    into low / mid / high missing groups.
+    """
+    total_rows = len(cleaned_rows)
+    fieldnames = cleaned_rows[0].keys()
+
+    missing_count = {field: 0 for field in fieldnames}
+
+    for row in cleaned_rows:
+        for field, value in row.items():
+            if value is None:
+                missing_count[field] += 1
+
+    missing_rate = {
+        field: missing_count[field] / total_rows
+        for field in fieldnames
+    }
+
+    low_missing = []
+    mid_missing = []
+    high_missing = []
+
+    for field, rate in missing_rate.items():
+        if rate <= 0.10:
+            low_missing.append(field)
+        elif rate <= 0.40:
+            mid_missing.append(field)
+        else:
+            high_missing.append(field)
+
+    return missing_rate, low_missing, mid_missing, high_missing
+
+
 
 
 # --------------------------------------------------------------------
