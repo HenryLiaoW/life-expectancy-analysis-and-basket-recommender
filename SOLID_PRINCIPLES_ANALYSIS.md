@@ -246,9 +246,9 @@ with open(path, "r", encoding="utf-8") as f:
 
 ### Test Coverage:
 - `data_loader.py`: 2 tests (basic functionality + error handling)
-- `cleaner.py`: 5 tests (valid/invalid/missing data scenarios)
+- `cleaner.py`: 7 tests (valid/invalid/missing data scenarios)
 - `analysis_correlation.py`: 18 tests (unit + integration + edge cases)
-- **Total**: 25 automated tests following TDD methodology
+- **Total**: 27 automated tests following TDD methodology
 
 ### Modularity:
 - 4 distinct modules with clear boundaries
