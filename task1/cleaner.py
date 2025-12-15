@@ -27,7 +27,7 @@ def clean_row(row: dict):
 # Numeric fields observed in the WHO-style life expectancy dataset
     numeric_fields = {
         "life_expect",
-        "life_expectancy",
+        "life_expectancy", #alternative name
         "life_exp60",
         "adult_mortality",
         "infant_mort",

@@ -94,17 +94,34 @@ def export_cleaned_dataset(
     output_path: str = "task1/data/life_expectancy_cleaned.csv",
 ):
     """
+    Execute the complete data cleaning pipeline from raw CSV to cleaned CSV.
+    
     Pipeline steps:
-    1. Load raw CSV (using data_loader)
-    2. Validate field structure
-    3. Clean each row (delegated to clean_row for clear separation of concerns)
-    4. Summarise missing values
-    5. Export cleaned CSV
-
-    This function demonstrates:
-    - modularity (separate loader, cleaner, and exporter)
-    - robustness (warnings, consistency checks)
-    - analytic support (missing-value summary)
+    1. Load raw CSV (using data_loader - Dependency Inversion Principle)
+    2. Validate field structure (robustness)
+    3. Clean each row (delegated to clean_row - Single Responsibility)
+    4. Analyse missing value rates (analytic insight)
+    5. Summarise missing values (transparency)
+    6. Export cleaned CSV (persistence)
+    
+    SOLID Principles demonstrated:
+    - Single Responsibility: This function only orchestrates; business logic is in cleaner.py
+    - Open/Closed: Adding new cleaning rules doesn't require changing this orchestration
+    - Dependency Inversion: Depends on load_csv and clean_row abstractions, not implementations
+    
+    Args:
+        input_path (str): Path to raw CSV file
+        output_path (str): Path where cleaned CSV will be written
+        
+    Raises:
+        ValueError: If input file is empty
+        FileNotFoundError: If input file does not exist
+        
+    Example:
+        >>> export_cleaned_dataset()
+        [INFO] Loaded 2938 rows from task1/data/life_expectancy.csv
+        [INFO] All rows have consistent fields.
+        [INFO] Successfully cleaned 2938 rows.
     """
     # --- Step 1: Load dataset ---
     rows = load_csv(input_path)
