@@ -106,7 +106,9 @@ def run_correlation_analysis(
     # Target variable
     target = "life_expect"
 
-    # Candidate predictors (low-missing group, pre-selected)
+    # ========================================================================
+    # PRIMARY PREDICTORS (low-missing group, pre-selected for analysis)
+    # ========================================================================
     predictors = [
         "adult_mortality",
         "infant_mort",
@@ -122,6 +124,33 @@ def run_correlation_analysis(
         "une_gni",
         "life_exp60",  # included but discussed as highly correlated by definition
     ]
+    
+    # ========================================================================
+    # ADDITIONAL PREDICTORS (higher missing rates, exploratory analysis)
+    # Comment out this section if you only want low-missing variables
+    # ========================================================================
+    additional_predictors = [
+        # Infrastructure-related indicators
+        "doctors",        # Missing: ~43%
+        "hospitals",      # Missing: ~96% (very high!)
+        "gni_capita",     # Missing: ~22%
+        # Health indicators
+        "age5-19thinness",
+        "age5-19obesity",
+        "hepatitis",
+        "measles",
+        "polio",
+        "diphtheria",
+        # Socio-economic indicators
+        "une_poverty",
+        "une_edu_spend",
+        "une_literacy",
+        "une_school",
+        "une_hiv",
+    ]
+    
+    # Combine (comment out this line to use only primary predictors)
+    predictors = predictors + additional_predictors
 
     # Extract target values
     y_vals = [safe_float(r.get(target)) for r in rows]
