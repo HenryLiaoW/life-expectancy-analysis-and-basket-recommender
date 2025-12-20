@@ -20,42 +20,9 @@ Test Categories:
 7. Intervention priority recommendations
 """
 
-import os
-import sqlite3
-import pytest
-import pandas as pd
-from task1.database_loader import create_database, load_data_to_db
-from task1.data_filter import (
-    get_data_as_dataframe,
-    filter_by_country,
-    filter_by_year_range,
-    filter_by_region,
-    calculate_statistics,
-    get_country_trend,
-    # Policy-oriented analysis functions
-    analyze_infrastructure_impact,
-    analyze_healthcare_spending,
-    analyze_nutrition_indicators,
-    identify_vaccination_gaps,
-    compare_modifiable_factors,
-    get_policy_intervention_priorities
-)
-
-
-# Test database path
-TEST_DB_PATH = "task1/data/test_filter.db"
-
-
-@pytest.fixture
-def test_db_with_data():
-    """Create test database with comprehensive modifiable factors data."""
-    if os.path.exists(TEST_DB_PATH):
-        os.remove(TEST_DB_PATH)
-    
-    create_database(TEST_DB_PATH)
-    
-    # Sample data covering modifiable factors across countries and years
-    sample_data = [
+"""
+test_data = [
+        # China (Asia) - High life expectancy, improving trend
         {"country": "China", "country_code": "CHN", "region": "Asia", 
          "year": 2015, "life_expect": 76.1, "adult_mortality": 120, "infant_mort": 8.1,
          "basic_water": 95.5, "gghe-d": 3.2, "bmi": 23.8, "alcohol": 7.2,
@@ -69,6 +36,7 @@ def test_db_with_data():
          "basic_water": 96.5, "gghe-d": 3.4, "bmi": 24.2, "alcohol": 7.4,
          "polio": 99.0, "diphtheria": 99.0, "hepatitis": 99.0},
         
+        # India (Asia) - Lower baseline, visible improvement potential
         {"country": "India", "country_code": "IND", "region": "Asia", 
          "year": 2015, "life_expect": 68.3, "adult_mortality": 190, "infant_mort": 37.9,
          "basic_water": 88.0, "gghe-d": 1.2, "bmi": 21.5, "alcohol": 5.7,
@@ -82,6 +50,7 @@ def test_db_with_data():
          "basic_water": 91.0, "gghe-d": 1.4, "bmi": 21.9, "alcohol": 5.9,
          "polio": 87.0, "diphtheria": 89.0, "hepatitis": 91.0},
         
+        # USA (Americas) - High life expectancy, obesity concern
         {"country": "USA", "country_code": "USA", "region": "Americas", 
          "year": 2015, "life_expect": 78.9, "adult_mortality": 110, "infant_mort": 5.9,
          "basic_water": 99.2, "gghe-d": 8.3, "bmi": 28.5, "alcohol": 9.2,
@@ -95,6 +64,7 @@ def test_db_with_data():
          "basic_water": 99.4, "gghe-d": 8.5, "bmi": 28.9, "alcohol": 9.4,
          "polio": 93.0, "diphtheria": 94.0, "hepatitis": 92.0},
         
+        # Brazil (Americas) - Middle range, good infrastructure
         {"country": "Brazil", "country_code": "BRA", "region": "Americas", 
          "year": 2015, "life_expect": 74.8, "adult_mortality": 145, "infant_mort": 14.2,
          "basic_water": 97.8, "gghe-d": 3.8, "bmi": 26.5, "alcohol": 8.9,
@@ -107,64 +77,91 @@ def test_db_with_data():
          "year": 2017, "life_expect": 75.2, "adult_mortality": 141, "infant_mort": 13.4,
          "basic_water": 98.2, "gghe-d": 4.0, "bmi": 26.9, "alcohol": 9.1,
          "polio": 96.0, "diphtheria": 97.0, "hepatitis": 96.0},
-    ]
-    
-    load_data_to_db(TEST_DB_PATH, sample_data)
-    
-    yield TEST_DB_PATH
-    
-    if os.path.exists(TEST_DB_PATH):
-        os.remove(TEST_DB_PATH)
+    ]"""
+
+
+
+
+import os
+import sqlite3
+import pytest
+import pandas as pd
+from task1.data_filter import (
+    get_data_as_dataframe,
+    filter_by_country,
+    filter_by_year_range,
+    filter_by_region,
+    calculate_statistics,
+    get_country_trend,
+    # Policy-oriented analysis functions
+    analyze_water_access_impact,
+    analyze_healthcare_spending,
+    analyze_nutrition_indicators,
+    identify_vaccination_gaps,
+    compare_modifiable_factors,
+    get_policy_intervention_priorities
+)
+
+# Test database path (shared with conftest.py)
+TEST_DB_PATH = "task1/data/test_filter.db"
+
+# Note: test_db_with_data fixture is now defined in conftest.py
+# This allows reuse across multiple test files and cleaner organization
 
 
 # ============================================================================
 # DataFrame Conversion Tests
 # ============================================================================
 
+# verify correct format conversion - DataFrame
 def test_get_data_as_dataframe_returns_dataframe(test_db_with_data):
     """Test that database records are converted to pandas DataFrame."""
     df = get_data_as_dataframe(TEST_DB_PATH)
     
-    assert isinstance(df, pd.DataFrame)
+    assert isinstance(df, pd.DataFrame) # Ensure return type is DataFrame
     assert len(df) == 12  # 4 countries × 3 years
-    assert "country" in df.columns
-    assert "year" in df.columns
+    assert "country" in df.columns # Ensure key columns exist
+    assert "year" in df.columns 
     assert "life_expect" in df.columns
 
-
+# ensure data types are appropriate
 def test_get_data_as_dataframe_has_correct_types(test_db_with_data):
     """Test that DataFrame columns have appropriate data types."""
     df = get_data_as_dataframe(TEST_DB_PATH)
     
     # String columns
-    assert df["country"].dtype == object
-    assert df["region"].dtype == object
+    assert df["country"].dtype == object  # 验证国家名、地区名没有被错误转换成数字
+    assert df["region"].dtype == object # verify country/region names are not misconverted to numeric
     
     # Numeric columns
-    assert pd.api.types.is_numeric_dtype(df["year"])
-    assert pd.api.types.is_float_dtype(df["life_expect"])
+    assert pd.api.types.is_numeric_dtype(df["year"]) # should be numeric（pragmatism TDD）
+    assert pd.api.types.is_float_dtype(df["life_expect"]) # should be float
 
-
+# process invalid path input
 def test_get_data_as_dataframe_validates_path():
     """Test that invalid database path raises appropriate error."""
-    with pytest.raises(FileNotFoundError):
-        get_data_as_dataframe("nonexistent.db")
+    with pytest.raises(FileNotFoundError): # expect FileNotFoundError for missing DB
+        get_data_as_dataframe("nonexistent.db") # give a non-existent path
 
 
 # ============================================================================
 # Filtering Tests - By Country
 # ============================================================================
 
+# to verify basic filtering works which can filter out specific countries
+# 1.基本功能测试: 验证能正确筛选出指定国家
 def test_filter_by_country_single_country(test_db_with_data):
     """Test filtering by single country name."""
     df = get_data_as_dataframe(TEST_DB_PATH)
     china_df = filter_by_country(df, "China")
     
-    assert len(china_df) == 3  # 3 years of data
     assert all(china_df["country"] == "China")
+    assert len(china_df) == 3  # 3 years of data
     assert china_df["year"].tolist() == [2015, 2016, 2017]
 
 
+# to ensure all columns are preserved
+# 2.数据完整性测试: 确保过滤后列不丢失
 def test_filter_by_country_preserves_columns(test_db_with_data):
     """Test that filtering preserves all DataFrame columns."""
     df = get_data_as_dataframe(TEST_DB_PATH)
@@ -173,15 +170,21 @@ def test_filter_by_country_preserves_columns(test_db_with_data):
     assert list(filtered.columns) == list(df.columns)
 
 
+# to check behavior with non-existent country
+# 3.边界情况测试: 处理不存在的国家名称(返回空DataFrame不报错)
 def test_filter_by_country_returns_empty_for_nonexistent(test_db_with_data):
     """Test that non-existent country returns empty DataFrame."""
     df = get_data_as_dataframe(TEST_DB_PATH)
-    result = filter_by_country(df, "Nonexistent")
+
+    # 就算国家不存在也不报错
+    # won't raise error even if country does not exist
+    result = filter_by_country(df, "Nonexistent") 
     
-    assert isinstance(result, pd.DataFrame)
-    assert len(result) == 0
+    assert isinstance(result, pd.DataFrame) # 确保返回DataFrame
+    assert len(result) == 0 # 确保为空
 
-
+# to verify case sensitivity（Capitalization）
+# 4.行为规范测试: 明确大小写敏感性
 def test_filter_by_country_case_sensitive(test_db_with_data):
     """Test that country filtering is case-sensitive."""
     df = get_data_as_dataframe(TEST_DB_PATH)
@@ -378,37 +381,37 @@ def test_get_country_trend_nonexistent_country(test_db_with_data):
 # Infrastructure Impact Analysis Tests (Modifiable Factor: r=0.831)
 # ============================================================================
 
-def test_analyze_infrastructure_impact_default_variables(test_db_with_data):
-    """Test infrastructure analysis with default variables (basic_water)."""
+def test_analyze_water_access_impact_default_variables(test_db_with_data):
+    """Test water access analysis with default variables (basic_water)."""
     df = get_data_as_dataframe(TEST_DB_PATH)
-    result = analyze_infrastructure_impact(df)
+    result = analyze_water_access_impact(df)
     
     assert isinstance(result, pd.DataFrame)
     assert "basic_water" in result.columns
     assert len(result) > 0
 
 
-def test_analyze_infrastructure_impact_custom_variables(test_db_with_data):
-    """Test infrastructure analysis with custom variable list."""
+def test_analyze_water_access_impact_custom_variables(test_db_with_data):
+    """Test water access analysis with custom variable list."""
     df = get_data_as_dataframe(TEST_DB_PATH)
-    result = analyze_infrastructure_impact(df, infrastructure_vars=["basic_water"])
+    result = analyze_water_access_impact(df, water_vars=["basic_water"])
     
     assert "basic_water" in result.columns
     assert isinstance(result, pd.DataFrame)
 
 
-def test_analyze_infrastructure_impact_missing_column_error(test_db_with_data):
-    """Test that invalid infrastructure column raises KeyError."""
+def test_analyze_water_access_impact_missing_column_error(test_db_with_data):
+    """Test that invalid water access column raises KeyError."""
     df = get_data_as_dataframe(TEST_DB_PATH)
     
     with pytest.raises(KeyError):
-        analyze_infrastructure_impact(df, infrastructure_vars=["nonexistent_var"])
+        analyze_water_access_impact(df, water_vars=["nonexistent_var"])
 
 
-def test_analyze_infrastructure_regional_differences(test_db_with_data):
-    """Test infrastructure analysis shows regional disparities."""
+def test_analyze_water_access_regional_differences(test_db_with_data):
+    """Test water access analysis shows regional disparities."""
     df = get_data_as_dataframe(TEST_DB_PATH)
-    result = analyze_infrastructure_impact(df)
+    result = analyze_water_access_impact(df)
     
     # India should show lower basic_water than USA/Brazil
     india_data = result[result["country"] == "India"]
@@ -574,7 +577,7 @@ def test_compare_modifiable_factors_validates_countries(test_db_with_data):
 def test_compare_modifiable_factors_multiple_years(test_db_with_data):
     """Test comparison across multiple years shows trends."""
     df = get_data_as_dataframe(TEST_DB_PATH)
-    result = compare_modifiable_factors(df, countries=["China", "USA"])
+    result = compare_modifiable_factors(df, countries=["China", "USA"], include_all_years=True)
     
     # Should have data for multiple years
     assert "year" in result.columns

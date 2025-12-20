@@ -23,6 +23,8 @@ Following SOLID Principles:
 
 import pandas as pd
 from typing import List, Dict, Any, Optional
+from pathlib import Path
+from . import database_loader
 
 
 def get_data_as_dataframe(db_path: str) -> pd.DataFrame:
@@ -38,7 +40,28 @@ def get_data_as_dataframe(db_path: str) -> pd.DataFrame:
     Raises:
         FileNotFoundError: If database doesn't exist
     """
-    pass
+    if not Path(db_path).exists():
+        raise FileNotFoundError(f"Database not found: {db_path}")
+    
+    records = database_loader.get_all_records(db_path)
+    return pd.DataFrame(records)
+
+
+def get_country_list(db_path: str) -> List[str]:
+    """
+    Get list of all unique countries in the database.
+    
+    Args:
+        db_path: Path to SQLite database
+        
+    Returns:
+        Sorted list of country names
+        
+    Raises:
+        FileNotFoundError: If database doesn't exist
+    """
+    df = get_data_as_dataframe(db_path)
+    return sorted(df["country"].unique().tolist())
 
 
 def filter_by_country(df: pd.DataFrame, country: str) -> pd.DataFrame:
@@ -52,7 +75,7 @@ def filter_by_country(df: pd.DataFrame, country: str) -> pd.DataFrame:
     Returns:
         Filtered DataFrame containing only specified country
     """
-    pass
+    return df[df["country"] == country]
 
 
 def filter_by_year_range(df: pd.DataFrame, start_year: int, end_year: int) -> pd.DataFrame:
@@ -70,7 +93,10 @@ def filter_by_year_range(df: pd.DataFrame, start_year: int, end_year: int) -> pd
     Raises:
         ValueError: If start_year > end_year
     """
-    pass
+    if start_year > end_year:
+        raise ValueError(f"start_year ({start_year}) cannot be greater than end_year ({end_year})")
+    
+    return df[(df["year"] >= start_year) & (df["year"] <= end_year)]
 
 
 def filter_by_region(df: pd.DataFrame, region: str) -> pd.DataFrame:
@@ -84,7 +110,7 @@ def filter_by_region(df: pd.DataFrame, region: str) -> pd.DataFrame:
     Returns:
         Filtered DataFrame containing only specified region
     """
-    pass
+    return df[df["region"] == region]
 
 
 def calculate_statistics(df: pd.DataFrame, column: str) -> Dict[str, Any]:
@@ -101,7 +127,19 @@ def calculate_statistics(df: pd.DataFrame, column: str) -> Dict[str, Any]:
     Raises:
         KeyError: If column doesn't exist
     """
-    pass
+    if column not in df.columns:
+        raise KeyError(f"Column '{column}' not found in DataFrame")
+    
+    series = df[column].dropna()  # Remove missing values
+    
+    return {
+        "mean": float(series.mean()),
+        "median": float(series.median()),
+        "std": float(series.std()),
+        "min": float(series.min()),
+        "max": float(series.max()),
+        "count": int(series.count())
+    }
 
 
 def get_country_trend(db_path: str, country: str, metric: str) -> pd.DataFrame:
@@ -120,36 +158,64 @@ def get_country_trend(db_path: str, country: str, metric: str) -> pd.DataFrame:
         KeyError: If metric column doesn't exist
         ValueError: If metric is invalid
     """
-    pass
+    df = get_data_as_dataframe(db_path)
+    
+    if metric not in df.columns:
+        raise KeyError(f"Metric column '{metric}' not found")
+    
+    country_df = filter_by_country(df, country)
+    
+    # Return empty DataFrame if country not found (don't raise)
+    if country_df.empty: 
+        return pd.DataFrame(columns=["year", metric])
+        # 之前是 raise ValueError(f"Country '{country}' not found in database")
+        # 改为返回空的DataFrame，方便调用方处理无数据情况。且不会中断程序执行。
+    result = country_df[["year", metric]].sort_values("year")
+    return result.reset_index(drop=True)
 
 
 # ============================================================================
 # Policy-Oriented Analysis Functions (Modifiable Factors)
 # ============================================================================
 
-def analyze_infrastructure_impact(
+def analyze_water_access_impact(
     df: pd.DataFrame, 
-    infrastructure_vars: Optional[List[str]] = None
+    water_vars: Optional[List[str]] = None
 ) -> pd.DataFrame:
     """
-    Analyze infrastructure factors impact on health outcomes.
+    Analyze water access impact on life expectancy.
     
-    Focus on modifiable factors:
-    - basic_water: Access to basic drinking water (r=0.831)
-    - sanitation_services: Access to sanitation facilities
+    Focus on drinking water access as key modifiable factor:
+    - basic_water: Population using at least basic drinking-water services (r=0.831)
+    
+    Note: Dataset only contains basic_water as water infrastructure indicator.
+          No sanitation_services or other infrastructure data available.
     
     Args:
         df: Input DataFrame
-        infrastructure_vars: List of infrastructure columns to analyze.
-                           Defaults to ['basic_water', 'sanitation_services']
+        water_vars: List of water access columns to analyze.
+                   Defaults to ['basic_water'] (only available column)
     
     Returns:
-        DataFrame with infrastructure metrics and correlation with life_expect
+        DataFrame with water access metrics and life_expect for analysis
     
     Raises:
         KeyError: If required columns don't exist
     """
-    pass
+    if water_vars is None:
+        # Use basic_water (only available water infrastructure indicator)
+        water_vars = ["basic_water"] if "basic_water" in df.columns else []
+    
+    # Check columns exist
+    missing_cols = [col for col in water_vars if col not in df.columns]
+    if missing_cols:
+        raise KeyError(f"Columns not found: {missing_cols}")
+    
+    # Return filtered DataFrame with requested columns
+    result_cols = ["country", "year", "region", "life_expect"] + water_vars
+    result_cols = [col for col in result_cols if col in df.columns]
+    
+    return df[result_cols].copy()
 
 
 def analyze_healthcare_spending(
@@ -171,7 +237,25 @@ def analyze_healthcare_spending(
     Returns:
         Dictionary with spending statistics and health outcome correlations
     """
-    pass
+    if region:
+        df = filter_by_region(df, region)
+    
+    results = {"region": region if region else "Global"}
+    
+    # Calculate statistics for gghe-d
+    if "gghe-d" in df.columns:
+        clean_df = df[["gghe-d", "life_expect"]].dropna()
+        if len(clean_df) > 0:
+            results["mean_gghe_d"] = float(clean_df["gghe-d"].mean())
+            results["median_gghe_d"] = float(clean_df["gghe-d"].median())
+            results["correlation_gghe_d"] = float(clean_df["gghe-d"].corr(clean_df["life_expect"]))
+    
+    # Add country rankings
+    if len(df) > 0 and "gghe-d" in df.columns:
+        rankings = df.groupby("country")["gghe-d"].mean().sort_values(ascending=False)
+        results["country_rankings"] = rankings.reset_index().to_dict('records')
+    
+    return results
 
 
 def analyze_nutrition_indicators(
@@ -193,7 +277,16 @@ def analyze_nutrition_indicators(
     Returns:
         DataFrame with nutrition indicators and trends
     """
-    pass
+    if year_range:
+        df = filter_by_year_range(df, year_range[0], year_range[1])
+    
+    nutrition_vars = ["bmi", "une_pop", "wasting"]
+    
+    # Return filtered DataFrame with nutrition columns
+    result_cols = ["country", "year", "region", "life_expect"] + [v for v in nutrition_vars if v in df.columns]
+    result_cols = [col for col in result_cols if col in df.columns]
+    
+    return df[result_cols].copy()
 
 
 def identify_vaccination_gaps(
@@ -215,13 +308,31 @@ def identify_vaccination_gaps(
     Returns:
         DataFrame with countries below threshold, sorted by gap size
     """
-    pass
+    vacc_vars = ["polio", "diphtheria", "hepatitis"]
+    
+    # Filter rows where ANY vaccine is below threshold
+    mask = pd.Series([False] * len(df), index=df.index)
+    for var in vacc_vars:
+        if var in df.columns:
+            mask = mask | (df[var] < threshold)
+    
+    result = df[mask].copy()
+    
+    # Sort by average vaccine coverage (lowest first)
+    if not result.empty and any(v in result.columns for v in vacc_vars):
+        available_vacc = [v for v in vacc_vars if v in result.columns]
+        result["avg_coverage"] = result[available_vacc].mean(axis=1)
+        result = result.sort_values("avg_coverage")
+        result = result.drop(columns=["avg_coverage"])
+    
+    return result.reset_index(drop=True)
 
 
 def compare_modifiable_factors(
     df: pd.DataFrame,
     countries: List[str],
-    factors: Optional[List[str]] = None
+    factors: Optional[List[str]] = None,
+    include_all_years: bool = False
 ) -> pd.DataFrame:
     """
     Compare modifiable factors across multiple countries.
@@ -236,6 +347,7 @@ def compare_modifiable_factors(
         df: Input DataFrame
         countries: List of country names to compare
         factors: Optional list of factor columns. Uses top correlations if None.
+        include_all_years: If True, return all years; if False, return only latest year per country
     
     Returns:
         DataFrame with comparative analysis across countries
@@ -243,7 +355,26 @@ def compare_modifiable_factors(
     Raises:
         ValueError: If any country not found in data
     """
-    pass
+    if factors is None:
+        factors = ["basic_water", "gghe-d", "bmi", "alcohol"]
+    
+    # Check all countries exist
+    available_countries = df["country"].unique()
+    missing = [c for c in countries if c not in available_countries]
+    if missing:
+        raise ValueError(f"country not found: {', '.join(missing)}")
+    
+    # Filter to requested countries
+    mask = df["country"].isin(countries)
+    result = df[mask].copy()
+    
+    # If not including all years, get only the latest year for each country
+    if not include_all_years:
+        result = result.sort_values("year", ascending=False).groupby("country").first().reset_index()
+    
+    columns_to_keep = ["country", "year"] + [f for f in factors if f in df.columns]
+    
+    return result[columns_to_keep].reset_index(drop=True)
 
 
 def get_policy_intervention_priorities(
@@ -271,4 +402,49 @@ def get_policy_intervention_priorities(
     Raises:
         ValueError: If country not found or target is below current value
     """
-    pass
+    country_df = filter_by_country(df, country)
+    
+    if country_df.empty:
+        raise ValueError(f"Country '{country}' not found in database")
+    
+    # Get most recent data
+    latest = country_df.sort_values("year", ascending=False).iloc[0]
+    current_life_expect = latest["life_expect"]
+    
+    if target_life_expectancy <= current_life_expect:
+        raise ValueError(f"target below current life expectancy (current: {current_life_expect})")
+    
+    current_gap = target_life_expectancy - current_life_expect
+    
+    # Analyze modifiable factors (based on correlation strength)
+    factors = [
+        {"name": "basic_water", "correlation": 0.831},
+        {"name": "gghe-d", "correlation": 0.610},
+        {"name": "bmi", "correlation": 0.598}
+    ]
+    
+    priorities = []
+    estimated_impact_dict = {}
+    
+    for factor in factors:
+        if factor["name"] in latest and pd.notna(latest[factor["name"]]):
+            # Simple estimation: correlation * gap * factor
+            estimated_impact = abs(factor["correlation"]) * current_gap * 0.1
+            estimated_impact_dict[factor["name"]] = round(estimated_impact, 2)
+            priorities.append({
+                "factor": factor["name"],
+                "current_value": float(latest[factor["name"]]),
+                "correlation": factor["correlation"],
+                "estimated_impact_years": round(estimated_impact, 2)
+            })
+    
+    priorities.sort(key=lambda x: x["estimated_impact_years"], reverse=True)
+    
+    return {
+        "country": country,
+        "current_life_expectancy": float(current_life_expect),
+        "target_life_expectancy": target_life_expectancy,
+        "current_gap": round(current_gap, 2),
+        "top_priorities": priorities,
+        "estimated_impact": estimated_impact_dict
+    }
