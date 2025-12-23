@@ -323,3 +323,264 @@ def test_get_records_by_year_range_raises_error_for_invalid_range(clean_test_db)
     
     with pytest.raises(ValueError, match="Start year cannot be greater than end year"):
         get_records_by_year_range(TEST_DB_PATH, 2020, 2015)
+
+
+# ============================================================================
+# CRUD Operations Tests (TDD RED Phase)
+# ============================================================================
+
+def test_update_record_by_country_year_updates_single_field(clean_test_db):
+    """Test updating a specific field for a country-year record."""
+    from task1.database_loader import update_record
+    
+    create_database(TEST_DB_PATH)
+    
+    # Insert initial data
+    data = [
+        {"country": "China", "year": 2015, "life_expect": 76.0, "bmi": 23.5},
+    ]
+    load_data_to_db(TEST_DB_PATH, data)
+    
+    # Update life_expect value
+    update_record(TEST_DB_PATH, country="China", year=2015, updates={"life_expect": 76.5})
+    
+    # Verify update
+    records = get_records_by_country(TEST_DB_PATH, "China")
+    assert len(records) == 1
+    assert records[0]["life_expect"] == 76.5
+    assert records[0]["bmi"] == 23.5  # Other fields unchanged
+
+
+def test_update_record_updates_multiple_fields(clean_test_db):
+    """Test updating multiple fields in one operation."""
+    from task1.database_loader import update_record
+    
+    create_database(TEST_DB_PATH)
+    
+    data = [
+        {"country": "India", "year": 2016, "life_expect": 68.0, "bmi": 21.5, "alcohol": 5.7},
+    ]
+    load_data_to_db(TEST_DB_PATH, data)
+    
+    # Update multiple fields
+    update_record(TEST_DB_PATH, country="India", year=2016, 
+                  updates={"life_expect": 68.5, "bmi": 21.8})
+    
+    # Verify updates
+    records = get_records_by_country(TEST_DB_PATH, "India")
+    assert records[0]["life_expect"] == 68.5
+    assert records[0]["bmi"] == 21.8
+    assert records[0]["alcohol"] == 5.7  # Unchanged field
+
+
+def test_update_record_raises_error_for_nonexistent_record(clean_test_db):
+    """Test that updating non-existent record raises ValueError."""
+    from task1.database_loader import update_record
+    
+    create_database(TEST_DB_PATH)
+    
+    with pytest.raises(ValueError, match="No record found"):
+        update_record(TEST_DB_PATH, country="Nonexistent", year=2015, 
+                      updates={"life_expect": 80.0})
+
+
+def test_update_record_validates_empty_updates(clean_test_db):
+    """Test that empty updates dict raises ValueError."""
+    from task1.database_loader import update_record
+    
+    create_database(TEST_DB_PATH)
+    
+    data = [{"country": "China", "year": 2015, "life_expect": 76.0}]
+    load_data_to_db(TEST_DB_PATH, data)
+    
+    with pytest.raises(ValueError, match="Updates dictionary cannot be empty"):
+        update_record(TEST_DB_PATH, country="China", year=2015, updates={})
+
+
+def test_delete_record_by_country_year_removes_single_record(clean_test_db):
+    """Test deleting a specific country-year record."""
+    from task1.database_loader import delete_record
+    
+    create_database(TEST_DB_PATH)
+    
+    data = [
+        {"country": "China", "year": 2015, "life_expect": 76.0},
+        {"country": "China", "year": 2016, "life_expect": 76.5},
+    ]
+    load_data_to_db(TEST_DB_PATH, data)
+    
+    # Delete 2015 record
+    delete_record(TEST_DB_PATH, country="China", year=2015)
+    
+    # Verify deletion
+    records = get_records_by_country(TEST_DB_PATH, "China")
+    assert len(records) == 1
+    assert records[0]["year"] == 2016
+
+
+def test_delete_record_raises_error_for_nonexistent_record(clean_test_db):
+    """Test that deleting non-existent record raises ValueError."""
+    from task1.database_loader import delete_record
+    
+    create_database(TEST_DB_PATH)
+    
+    with pytest.raises(ValueError, match="No record found"):
+        delete_record(TEST_DB_PATH, country="Nonexistent", year=2015)
+
+
+def test_delete_all_records_for_country_removes_multiple_records(clean_test_db):
+    """Test deleting all records for a specific country."""
+    from task1.database_loader import delete_records_by_country
+    
+    create_database(TEST_DB_PATH)
+    
+    data = [
+        {"country": "China", "year": 2015, "life_expect": 76.0},
+        {"country": "China", "year": 2016, "life_expect": 76.5},
+        {"country": "India", "year": 2015, "life_expect": 68.0},
+    ]
+    load_data_to_db(TEST_DB_PATH, data)
+    
+    # Delete all China records
+    deleted_count = delete_records_by_country(TEST_DB_PATH, "China")
+    
+    assert deleted_count == 2
+    
+    # Verify China records removed
+    china_records = get_records_by_country(TEST_DB_PATH, "China")
+    assert len(china_records) == 0
+    
+    # Verify India record still exists
+    india_records = get_records_by_country(TEST_DB_PATH, "India")
+    assert len(india_records) == 1
+
+
+def test_delete_records_by_country_returns_zero_for_nonexistent(clean_test_db):
+    """Test that deleting non-existent country returns 0."""
+    from task1.database_loader import delete_records_by_country
+    
+    create_database(TEST_DB_PATH)
+    
+    deleted_count = delete_records_by_country(TEST_DB_PATH, "Nonexistent")
+    assert deleted_count == 0
+
+
+def test_create_record_inserts_new_record(clean_test_db):
+    """Test creating a new record in the database."""
+    from task1.database_loader import create_record
+    
+    create_database(TEST_DB_PATH)
+    
+    # Create new record
+    new_record = {
+        "country": "Japan",
+        "year": 2015,
+        "life_expect": 83.5,
+        "bmi": 22.5,
+        "region": "Asia"
+    }
+    create_record(TEST_DB_PATH, new_record)
+    
+    # Verify insertion
+    records = get_records_by_country(TEST_DB_PATH, "Japan")
+    assert len(records) == 1
+    assert records[0]["life_expect"] == 83.5
+
+
+def test_create_record_raises_error_for_duplicate(clean_test_db):
+    """Test that creating duplicate country-year raises ValueError."""
+    from task1.database_loader import create_record
+    
+    create_database(TEST_DB_PATH)
+    
+    record = {"country": "China", "year": 2015, "life_expect": 76.0}
+    load_data_to_db(TEST_DB_PATH, [record])
+    
+    # Attempt to create duplicate
+    with pytest.raises(ValueError, match="already exists"):
+        create_record(TEST_DB_PATH, record)
+
+
+# ============================================================================
+# Generalized CRUD Tests (Flexible Filtering)
+# ============================================================================
+
+def test_delete_records_by_region_removes_all_regional_data(clean_test_db):
+    """Test deleting all records for a specific region."""
+    from task1.database_loader import delete_records
+    
+    create_database(TEST_DB_PATH)
+    
+    data = [
+        {"country": "China", "region": "Asia", "year": 2015, "life_expect": 76.0},
+        {"country": "India", "region": "Asia", "year": 2015, "life_expect": 68.0},
+        {"country": "USA", "region": "Americas", "year": 2015, "life_expect": 78.0},
+    ]
+    load_data_to_db(TEST_DB_PATH, data)
+    
+    # Delete all Asia records
+    deleted_count = delete_records(TEST_DB_PATH, filters={"region": "Asia"})
+    
+    assert deleted_count == 2
+    
+    # Verify only Americas remains
+    all_records = get_all_records(TEST_DB_PATH)
+    assert len(all_records) == 1
+    assert all_records[0]["country"] == "USA"
+
+
+def test_delete_records_by_year_removes_specific_year(clean_test_db):
+    """Test deleting all records for a specific year."""
+    from task1.database_loader import delete_records
+    
+    create_database(TEST_DB_PATH)
+    
+    data = [
+        {"country": "China", "year": 2015, "life_expect": 76.0},
+        {"country": "China", "year": 2016, "life_expect": 76.5},
+        {"country": "India", "year": 2015, "life_expect": 68.0},
+    ]
+    load_data_to_db(TEST_DB_PATH, data)
+    
+    # Delete all 2015 records
+    deleted_count = delete_records(TEST_DB_PATH, filters={"year": 2015})
+    
+    assert deleted_count == 2
+    
+    # Verify only 2016 remains
+    remaining = get_all_records(TEST_DB_PATH)
+    assert len(remaining) == 1
+    assert remaining[0]["year"] == 2016
+
+
+def test_delete_records_with_multiple_filters(clean_test_db):
+    """Test delete with combined filters (country + year)."""
+    from task1.database_loader import delete_records
+    
+    create_database(TEST_DB_PATH)
+    
+    data = [
+        {"country": "China", "year": 2015, "life_expect": 76.0},
+        {"country": "China", "year": 2016, "life_expect": 76.5},
+        {"country": "India", "year": 2015, "life_expect": 68.0},
+    ]
+    load_data_to_db(TEST_DB_PATH, data)
+    
+    # Delete only China 2015
+    deleted_count = delete_records(TEST_DB_PATH, filters={"country": "China", "year": 2015})
+    
+    assert deleted_count == 1
+    
+    # Verify others remain
+    remaining = get_all_records(TEST_DB_PATH)
+    assert len(remaining) == 2
+
+
+def test_delete_records_raises_error_for_empty_filters(clean_test_db):
+    """Test that empty filters prevent accidental deletion of all data."""
+    from task1.database_loader import delete_records
+    
+    create_database(TEST_DB_PATH)
+    
+    with pytest.raises(ValueError, match="Filters cannot be empty"):
+        delete_records(TEST_DB_PATH, filters={})

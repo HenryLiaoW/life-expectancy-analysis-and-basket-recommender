@@ -312,3 +312,118 @@ def get_records_by_year_range(db_path: str, start_year: int, end_year: int) -> L
         
     finally:
         conn.close()
+
+
+# ============================================================================
+# CRUD Operations - Generalized Design
+# ============================================================================
+
+def _build_where_clause(filters: Dict[str, Any]) -> tuple:
+    """
+    Build SQL WHERE clause from filters dictionary.
+    
+    Args:
+        filters: Dictionary of field names and values to filter by
+        
+    Returns:
+        Tuple of (where_clause_string, values_tuple)
+        
+    Example:
+        >>> _build_where_clause({"country": "China", "year": 2015})
+        ("WHERE country = ? AND year = ?", ("China", 2015))
+    """
+    pass  # RED phase: Test written, implementation pending
+
+
+def create_record(db_path: str, record: Dict[str, Any]) -> None:
+    """
+    Create a new record in the database.
+    
+    Args:
+        db_path: Path to the SQLite database file
+        record: Dictionary containing the new record data
+        
+    Raises:
+        ValueError: If record already exists (duplicate country-year) or missing required fields
+        sqlite3.Error: If database operation fails
+        
+    Note:
+        This enforces uniqueness. Use load_data_to_db() for INSERT OR REPLACE behavior.
+    """
+    pass  # RED phase: Test written, implementation pending
+
+
+def update_record(db_path: str, country: str, year: int, updates: Dict[str, Any]) -> None:
+    """
+    Update specific fields for a country-year record.
+    
+    Args:
+        db_path: Path to the SQLite database file
+        country: Country name to identify the record
+        year: Year to identify the record
+        updates: Dictionary of field names and new values to update
+        
+    Raises:
+        ValueError: If no record found or updates dict is empty
+        sqlite3.Error: If database operation fails
+        
+    Example:
+        >>> update_record("data.db", "China", 2015, {"life_expect": 76.5, "bmi": 24.0})
+    """
+    pass  # RED phase: Test written, implementation pending
+
+
+def delete_record(db_path: str, country: str, year: int) -> None:
+    """
+    Delete a specific country-year record.
+    
+    Args:
+        db_path: Path to the SQLite database file
+        country: Country name to identify the record
+        year: Year to identify the record
+        
+    Raises:
+        ValueError: If no record found to delete
+        sqlite3.Error: If database operation fails
+    """
+    pass  # RED phase: Test written, implementation pending
+
+
+def delete_records(db_path: str, filters: Dict[str, Any]) -> int:
+    """
+    Delete records matching the given filters (GENERALIZED).
+    
+    Args:
+        db_path: Path to the SQLite database file
+        filters: Dictionary of field names and values to filter by
+        
+    Returns:
+        Number of records deleted
+        
+    Raises:
+        ValueError: If filters is empty
+        sqlite3.Error: If database operation fails
+        
+    Examples:
+        >>> delete_records("data.db", {"country": "China"})  # Delete all China records
+        >>> delete_records("data.db", {"region": "Asia"})    # Delete all Asia records
+        >>> delete_records("data.db", {"country": "China", "year": 2015})  # Delete specific record
+    """
+    pass  # RED phase: Test written, implementation pending
+
+
+def delete_records_by_country(db_path: str, country: str) -> int:
+    """
+    Delete all records for a specific country.
+    
+    Args:
+        db_path: Path to the SQLite database file
+        country: Country name to delete all records for
+        
+    Returns:
+        Number of records deleted
+        
+    Note:
+        This is a convenience wrapper around delete_records().
+    """
+    pass  # RED phase: Test written, implementation pending
