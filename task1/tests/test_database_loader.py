@@ -493,10 +493,10 @@ def test_create_record_raises_error_for_duplicate(clean_test_db):
     
     create_database(TEST_DB_PATH)
     
-    record = {"country": "China", "year": 2015, "life_expect": 76.0}
+    record = {"country": "China", "year": 2015, "region": "Asia", "life_expect": 76.0}
     load_data_to_db(TEST_DB_PATH, [record])
     
-    # Attempt to create duplicate
+    # Attempt to create duplicate (must include all required fields)
     with pytest.raises(ValueError, match="already exists"):
         create_record(TEST_DB_PATH, record)
 

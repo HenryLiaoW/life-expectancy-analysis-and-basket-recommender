@@ -45,6 +45,14 @@ from task1.data_filter import (
     get_policy_intervention_priorities,
 )
 
+from task1.database_loader import (
+    create_record,
+    update_record,
+    delete_record,
+    delete_records,
+    get_records_by_country,
+)
+
 # Default database path
 # During development/testing: use demo.db for fast feedback (TDD)
 # For production: change to life_expectancy.db
@@ -254,6 +262,259 @@ class LifeExpectancyCLI:
         
         print("\n" + "="*70 + "\n")
     
+    def cmd_create(self, args):
+        """Interactive record creation."""
+        print("\n" + "="*70)
+        print("✨ Create New Record (Interactive Mode)")
+        print("="*70)
+        print("\n📋 Required fields (country, year, region, life_expect):")
+        print("   Optional fields will be prompted after.\n")
+        
+        try:
+            # Required fields
+            country = input("Country (required): ").strip()
+            if not country:
+                print("❌ Country is required!")
+                return
+            
+            year_str = input("Year (required): ").strip()
+            if not year_str:
+                print("❌ Year is required!")
+                return
+            
+            try:
+                year = int(year_str)
+            except ValueError:
+                print("❌ Year must be a number!")
+                return
+            
+            region = input("Region (required, e.g., Asia, Europe): ").strip()
+            if not region:
+                print("❌ Region is required!")
+                return
+            
+            life_expect_str = input("Life Expectancy in years (required): ").strip()
+            if not life_expect_str:
+                print("❌ Life Expectancy is required! This is the core metric of the database.")
+                return
+            
+            try:
+                life_expect = float(life_expect_str)
+            except ValueError:
+                print("❌ Life Expectancy must be a number!")
+                return
+            
+            # Build record dict with required fields
+            record = {
+                "country": country, 
+                "year": year, 
+                "region": region, 
+                "life_expect": life_expect
+            }
+            
+            # Optional fields with prompts
+            optional_fields = [
+                ("bmi", "BMI (average)"),
+                ("basic_water", "Basic Water Access (%)"),
+                ("gghe-d", "Health Expenditure (% GDP)"),
+                ("alcohol", "Alcohol Consumption (liters)"),
+                ("polio", "Polio Vaccination Coverage (%)"),
+                ("diphtheria", "Diphtheria Vaccination Coverage (%)"),
+            ]
+            
+            print("\nOptional fields (press Enter to skip):\n")
+            for field, prompt in optional_fields:
+                value = input(f"{prompt}: ").strip()
+                if value:
+                    try:
+                        # Try to convert to float for numeric fields
+                        if field != "region":
+                            record[field] = float(value)
+                        else:
+                            record[field] = value
+                    except ValueError:
+                        print(f"  ⚠️  Invalid value for {field}, skipping...")
+            
+            # Confirm before creation
+            print("\n" + "-"*70)
+            print("Record to be created:")
+            for key, value in record.items():
+                print(f"  {key}: {value}")
+            print("-"*70)
+            
+            confirm = input("\nCreate this record? (yes/no): ").strip().lower()
+            if confirm not in ['yes', 'y']:
+                print("❌ Operation cancelled.")
+                return
+            
+            # Create record
+            create_record(self.db_path, record)
+            print(f"\n✅ Record created successfully: {country} ({year})")
+            
+        except ValueError as e:
+            print(f"\n❌ Error: {e}")
+        except Exception as e:
+            print(f"\n❌ Unexpected error: {e}")
+        
+        print("\n" + "="*70 + "\n")
+    
+    def cmd_update(self, args):
+        """Interactive record update."""
+        print("\n" + "="*70)
+        print("✏️  Update Existing Record (Interactive Mode)")
+        print("="*70)
+        print("\nFirst, identify the record to update:\n")
+        
+        try:
+            # Identify record
+            country = input("Country (required): ").strip()
+            if not country:
+                print("❌ Country is required!")
+                return
+            
+            year_str = input("Year (required): ").strip()
+            if not year_str:
+                print("❌ Year is required!")
+                return
+            
+            try:
+                year = int(year_str)
+            except ValueError:
+                print("❌ Year must be a number!")
+                return
+            
+            # Check if record exists
+            existing = get_records_by_country(self.db_path, country)
+            record_exists = any(r['year'] == year for r in existing)
+            
+            if not record_exists:
+                print(f"\n❌ No record found for {country} in year {year}")
+                return
+            
+            # Show current record
+            current = next(r for r in existing if r['year'] == year)
+            print("\n" + "-"*70)
+            print("Current record:")
+            print(f"  Country: {current['country']}")
+            print(f"  Year: {current['year']}")
+            print(f"  Life Expectancy: {current.get('life_expect', 'N/A')}")
+            print(f"  BMI: {current.get('bmi', 'N/A')}")
+            print(f"  Water Access: {current.get('basic_water', 'N/A')}")
+            print("-"*70)
+            
+            # Get fields to update
+            print("\nEnter new values (press Enter to keep current value):\n")
+            
+            updates = {}
+            update_fields = [
+                ("life_expect", "Life Expectancy (years)"),
+                ("bmi", "BMI (average)"),
+                ("basic_water", "Basic Water Access (%)"),
+                ("gghe-d", "Health Expenditure (% GDP)"),
+                ("alcohol", "Alcohol Consumption (liters)"),
+            ]
+            
+            for field, prompt in update_fields:
+                current_value = current.get(field, "N/A")
+                value = input(f"{prompt} [current: {current_value}]: ").strip()
+                if value:
+                    try:
+                        updates[field] = float(value)
+                    except ValueError:
+                        print(f"  ⚠️  Invalid value for {field}, skipping...")
+            
+            if not updates:
+                print("\n❌ No fields to update!")
+                return
+            
+            # Confirm update
+            print("\n" + "-"*70)
+            print("Fields to be updated:")
+            for key, value in updates.items():
+                print(f"  {key}: {current.get(key, 'N/A')} → {value}")
+            print("-"*70)
+            
+            confirm = input("\nUpdate this record? (yes/no): ").strip().lower()
+            if confirm not in ['yes', 'y']:
+                print("❌ Operation cancelled.")
+                return
+            
+            # Update record
+            update_record(self.db_path, country, year, updates)
+            print(f"\n✅ Record updated successfully: {country} ({year})")
+            
+        except ValueError as e:
+            print(f"\n❌ Error: {e}")
+        except Exception as e:
+            print(f"\n❌ Unexpected error: {e}")
+        
+        print("\n" + "="*70 + "\n")
+    
+    def cmd_delete(self, args):
+        """Interactive record deletion."""
+        print("\n" + "="*70)
+        print("🗑️  Delete Record (Interactive Mode)")
+        print("="*70)
+        print("\n⚠️  WARNING: This operation cannot be undone!\n")
+        
+        try:
+            # Identify record
+            country = input("Country (required): ").strip()
+            if not country:
+                print("❌ Country is required!")
+                return
+            
+            year_str = input("Year (required): ").strip()
+            if not year_str:
+                print("❌ Year is required!")
+                return
+            
+            try:
+                year = int(year_str)
+            except ValueError:
+                print("❌ Year must be a number!")
+                return
+            
+            # Check if record exists and show it
+            existing = get_records_by_country(self.db_path, country)
+            record_exists = any(r['year'] == year for r in existing)
+            
+            if not record_exists:
+                print(f"\n❌ No record found for {country} in year {year}")
+                return
+            
+            # Show record to be deleted
+            current = next(r for r in existing if r['year'] == year)
+            print("\n" + "-"*70)
+            print("Record to be DELETED:")
+            print(f"  Country: {current['country']}")
+            print(f"  Year: {current['year']}")
+            print(f"  Life Expectancy: {current.get('life_expect', 'N/A')}")
+            print(f"  BMI: {current.get('bmi', 'N/A')}")
+            print("-"*70)
+            
+            # Double confirmation
+            confirm1 = input("\n⚠️  Delete this record? (yes/no): ").strip().lower()
+            if confirm1 not in ['yes', 'y']:
+                print("❌ Operation cancelled.")
+                return
+            
+            confirm2 = input("⚠️  Are you absolutely sure? (type 'DELETE' to confirm): ").strip()
+            if confirm2 != 'DELETE':
+                print("❌ Operation cancelled.")
+                return
+            
+            # Delete record
+            delete_record(self.db_path, country, year)
+            print(f"\n✅ Record deleted successfully: {country} ({year})")
+            
+        except ValueError as e:
+            print(f"\n❌ Error: {e}")
+        except Exception as e:
+            print(f"\n❌ Unexpected error: {e}")
+        
+        print("\n" + "="*70 + "\n")
+    
     def cmd_trend(self, args):
         """Show time series trend for a country."""
         print("\n" + "="*70)
@@ -354,6 +615,11 @@ Examples:
     trend_parser.add_argument('--country', required=True, help='Country name')
     trend_parser.add_argument('--metric', default='life_expect', help='Metric to analyze')
     trend_parser.add_argument('--output', '-o', help='Export to CSV file')
+    
+    # CRUD commands
+    create_parser = subparsers.add_parser('create', help='Create new record (interactive)')
+    update_parser = subparsers.add_parser('update', help='Update existing record (interactive)')
+    delete_parser = subparsers.add_parser('delete', help='Delete record (interactive)')
     
     return parser
 
