@@ -318,6 +318,25 @@ def get_records_by_year_range(db_path: str, start_year: int, end_year: int) -> L
 # CRUD Operations - Generalized Design
 # ============================================================================
 
+def _quote_field_name(field: str) -> str:
+    """
+    Quote field name if it contains hyphens for SQL compatibility.
+    
+    Args:
+        field: Field name to potentially quote
+        
+    Returns:
+        Quoted field name if contains hyphen, otherwise original name
+        
+    Example:
+        >>> _quote_field_name("country")
+        'country'
+        >>> _quote_field_name("health-spending")
+        '"health-spending"'
+    """
+    return f'"{field}"' if '-' in field else field
+
+
 def _build_where_clause(filters: Dict[str, Any]) -> tuple:
     """
     Build SQL WHERE clause from filters dictionary.
@@ -339,8 +358,7 @@ def _build_where_clause(filters: Dict[str, Any]) -> tuple:
     values = []
     
     for field, value in filters.items():
-        # Handle hyphenated column names
-        field_name = f'"{field}"' if '-' in field else field
+        field_name = _quote_field_name(field)
         conditions.append(f"{field_name} = ?")
         values.append(value)
     
@@ -388,7 +406,7 @@ def create_record(db_path: str, record: Dict[str, Any]) -> None:
             cursor = conn.cursor()
             
             columns = list(record.keys())
-            quoted_columns = [f'"{col}"' if '-' in col else col for col in columns]
+            quoted_columns = [_quote_field_name(col) for col in columns]
             placeholders = ", ".join(["?"] * len(columns))
             column_names = ", ".join(quoted_columns)
             
@@ -436,7 +454,7 @@ def update_record(db_path: str, country: str, year: int, updates: Dict[str, Any]
             set_parts = []
             values = []
             for field, value in updates.items():
-                field_name = f'"{field}"' if '-' in field else field
+                field_name = _quote_field_name(field)
                 set_parts.append(f"{field_name} = ?")
                 values.append(value)
             
