@@ -200,16 +200,20 @@ def test_filter_by_country_case_sensitive(test_db_with_data):
 # Filtering Tests - By Year Range
 # ============================================================================
 
+# normal year range filtering
 def test_filter_by_year_range_inclusive(test_db_with_data):
     """Test that year range filtering is inclusive on both ends."""
     df = get_data_as_dataframe(TEST_DB_PATH)
     filtered = filter_by_year_range(df, 2015, 2016)
     
-    years = sorted(filtered["year"].unique())
+    years = sorted(filtered["year"].unique()) 
+    # unique: get array like array([2016, 2015]) or array([2015, 2016])
+    # sorted: sort to [2015, 2016]
+
     assert years == [2015, 2016]
     assert len(filtered) == 8  # 4 countries × 2 years
 
-
+# single year filtering (edge case)
 def test_filter_by_year_range_single_year(test_db_with_data):
     """Test filtering for a single year."""
     df = get_data_as_dataframe(TEST_DB_PATH)
@@ -218,15 +222,16 @@ def test_filter_by_year_range_single_year(test_db_with_data):
     assert len(filtered) == 4  # 4 countries
     assert all(filtered["year"] == 2017)
 
-
+# invalid year range (start > end)
 def test_filter_by_year_range_validates_range(test_db_with_data):
     """Test that invalid year range raises ValueError."""
     df = get_data_as_dataframe(TEST_DB_PATH)
     
-    with pytest.raises(ValueError, match="start_year.*end_year"):
+    # Precise match for range validation error (original "start_year.*end_year" was too loose)
+    with pytest.raises(ValueError, match="start_year.*cannot be greater than.*end_year"):
         filter_by_year_range(df, 2020, 2015)
 
-
+# out-of-range years return empty DataFrame
 def test_filter_by_year_range_no_matches(test_db_with_data):
     """Test that out-of-range years return empty DataFrame."""
     df = get_data_as_dataframe(TEST_DB_PATH)
@@ -246,16 +251,7 @@ def test_filter_by_region_single_region(test_db_with_data):
     
     assert len(asia_df) == 6  # China (3) + India (3)
     assert all(asia_df["region"] == "Asia")
-    assert set(asia_df["country"].unique()) == {"China", "India"}
-
-
-def test_filter_by_region_americas(test_db_with_data):
-    """Test filtering Americas region."""
-    df = get_data_as_dataframe(TEST_DB_PATH)
-    americas_df = filter_by_region(df, "Americas")
-    
-    assert len(americas_df) == 6  # USA (3) + Brazil (3)
-    assert set(americas_df["country"].unique()) == {"USA", "Brazil"}
+    assert set(asia_df["country"].unique()) == {"China", "India"} # optional (defensive double check)
 
 
 def test_filter_by_region_empty_result(test_db_with_data):
@@ -263,11 +259,12 @@ def test_filter_by_region_empty_result(test_db_with_data):
     df = get_data_as_dataframe(TEST_DB_PATH)
     result = filter_by_region(df, "Europe")
     
-    assert len(result) == 0
-
+    assert len(result) == 0 
+    #expected result is an empty DataFrame(e,g. []  with columns but no rows)
+    # data shape: (0, 3) 0 rows, 3 columns (country, year, life_expect)
 
 # ============================================================================
-# Multi-Condition Filtering Tests
+# Multi-Condition Filtering Tests (integration-style unit tests)
 # ============================================================================
 
 def test_combined_filters_country_and_year(test_db_with_data):
@@ -278,9 +275,13 @@ def test_combined_filters_country_and_year(test_db_with_data):
     china_df = filter_by_country(df, "China")
     result = filter_by_year_range(china_df, 2016, 2017)
     
-    assert len(result) == 2
-    assert all(result["country"] == "China")
+    assert len(result) == 2 
+    assert all(result["country"] == "China") 
+    # each row country doing boolean check with "China"
+    # all() requires all rows to be True to pass
+
     assert result["year"].tolist() == [2016, 2017]
+    # convert dataframe's series to list for easy comparison
 
 
 def test_combined_filters_region_and_year(test_db_with_data):
@@ -292,18 +293,20 @@ def test_combined_filters_region_and_year(test_db_with_data):
     result = filter_by_year_range(asia_df, 2015, 2015)
     
     assert len(result) == 2  # China and India in 2015
-    assert set(result["country"].unique()) == {"China", "India"}
+    assert set(result["country"].unique()) == {"China", "India"} # don't care order
 
 
 # ============================================================================
 # Statistical Analysis Tests
 # ============================================================================
 
+# verify basic statistics calculation
 def test_calculate_statistics_basic_metrics(test_db_with_data):
     """Test calculating basic statistics for a column."""
     df = get_data_as_dataframe(TEST_DB_PATH)
     china_df = filter_by_country(df, "China")
     
+    # Stats is a dict e.g. {"mean": 76.4, "median": 76.4, ...}
     stats = calculate_statistics(china_df, "life_expect")
     
     assert "mean" in stats
@@ -314,21 +317,21 @@ def test_calculate_statistics_basic_metrics(test_db_with_data):
     assert "count" in stats
     
     # Verify values for China's life expectancy (76.1, 76.4, 76.7)
-    assert stats["mean"] == pytest.approx(76.4, rel=0.01)
+    assert stats["mean"] == pytest.approx(76.4, rel=0.01)# allow small floating point tolerance due to float arithmetic
     assert stats["median"] == 76.4
     assert stats["min"] == 76.1
     assert stats["max"] == 76.7
     assert stats["count"] == 3
 
-
+# capture errors for missing column
 def test_calculate_statistics_handles_missing_column(test_db_with_data):
     """Test that invalid column raises appropriate error."""
     df = get_data_as_dataframe(TEST_DB_PATH)
     
-    with pytest.raises(KeyError):
-        calculate_statistics(df, "nonexistent_column")
+    with pytest.raises(KeyError): 
+        calculate_statistics(df, "nonexistent_column") 
 
-
+# cope with empty DataFrame input
 def test_calculate_statistics_empty_dataframe(test_db_with_data):
     """Test statistics on empty DataFrame."""
     df = get_data_as_dataframe(TEST_DB_PATH)

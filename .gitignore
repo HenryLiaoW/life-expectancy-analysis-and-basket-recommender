@@ -14,3 +14,12 @@ venv/
 
 .DS_Store
 *.db
+
+# Task1 documentation (excluded from commits)
+task1/CLI_USAGE.md
+task1/TEST_DATABASE_GUIDE.md
+task1/VARIABLE_ANALYSIS.md
+task1/README.md
+
+# Documentation directory
+docs/

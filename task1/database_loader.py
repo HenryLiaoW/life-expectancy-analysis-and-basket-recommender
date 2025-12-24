@@ -388,8 +388,13 @@ def create_record(db_path: str, record: Dict[str, Any]) -> None:
         raise ValueError("Record cannot be empty")
     
     # Check required fields
-    if "country" not in record or "year" not in record:
-        raise ValueError("Record must contain 'country' and 'year' fields")
+    required_fields = ["country", "year", "region", "life_expect"]
+    missing_fields = [field for field in required_fields if field not in record]
+    if missing_fields:
+        raise ValueError(
+            f"Record must contain required fields: {', '.join(missing_fields)}. "
+            "Core fields (country, year, region, life_expect) are mandatory for data quality."
+        )
     
     # Check if record already exists
     existing = get_records_by_country(db_path, record["country"])
