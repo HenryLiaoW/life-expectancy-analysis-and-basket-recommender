@@ -332,7 +332,20 @@ def _build_where_clause(filters: Dict[str, Any]) -> tuple:
         >>> _build_where_clause({"country": "China", "year": 2015})
         ("WHERE country = ? AND year = ?", ("China", 2015))
     """
-    pass  # RED phase: Test written, implementation pending
+    if not filters:
+        return "", ()
+    
+    conditions = []
+    values = []
+    
+    for field, value in filters.items():
+        # Handle hyphenated column names
+        field_name = f'"{field}"' if '-' in field else field
+        conditions.append(f"{field_name} = ?")
+        values.append(value)
+    
+    where_clause = "WHERE " + " AND ".join(conditions)
+    return where_clause, tuple(values)
 
 
 def create_record(db_path: str, record: Dict[str, Any]) -> None:
@@ -350,7 +363,40 @@ def create_record(db_path: str, record: Dict[str, Any]) -> None:
     Note:
         This enforces uniqueness. Use load_data_to_db() for INSERT OR REPLACE behavior.
     """
-    pass  # RED phase: Test written, implementation pending
+    if not db_path:
+        raise ValueError("Database path cannot be empty")
+    
+    if not record:
+        raise ValueError("Record cannot be empty")
+    
+    # Check required fields
+    if "country" not in record or "year" not in record:
+        raise ValueError("Record must contain 'country' and 'year' fields")
+    
+    # Check if record already exists
+    existing = get_records_by_country(db_path, record["country"])
+    for rec in existing:
+        if rec["year"] == record["year"]:
+            raise ValueError(
+                f"Record for {record['country']} in year {record['year']} already exists. "
+                "Use update_record() to modify existing records."
+            )
+    
+    # Insert new record using load_data_to_db
+    try:
+        with _get_connection_context(db_path) as conn:
+            cursor = conn.cursor()
+            
+            columns = list(record.keys())
+            quoted_columns = [f'"{col}"' if '-' in col else col for col in columns]
+            placeholders = ", ".join(["?"] * len(columns))
+            column_names = ", ".join(quoted_columns)
+            
+            insert_sql = f"INSERT INTO life_expectancy ({column_names}) VALUES ({placeholders})"
+            cursor.execute(insert_sql, tuple(record.values()))
+            
+    except sqlite3.IntegrityError as e:
+        raise ValueError(f"Failed to create record: {e}")
 
 
 def update_record(db_path: str, country: str, year: int, updates: Dict[str, Any]) -> None:
@@ -370,7 +416,38 @@ def update_record(db_path: str, country: str, year: int, updates: Dict[str, Any]
     Example:
         >>> update_record("data.db", "China", 2015, {"life_expect": 76.5, "bmi": 24.0})
     """
-    pass  # RED phase: Test written, implementation pending
+    if not db_path:
+        raise ValueError("Database path cannot be empty")
+    
+    if not updates:
+        raise ValueError("Updates dictionary cannot be empty")
+    
+    # Check if record exists
+    existing = get_records_by_country(db_path, country)
+    found = any(rec["year"] == year for rec in existing)
+    if not found:
+        raise ValueError(f"No record found for {country} in year {year}")
+    
+    try:
+        with _get_connection_context(db_path) as conn:
+            cursor = conn.cursor()
+            
+            # Build SET clause
+            set_parts = []
+            values = []
+            for field, value in updates.items():
+                field_name = f'"{field}"' if '-' in field else field
+                set_parts.append(f"{field_name} = ?")
+                values.append(value)
+            
+            set_clause = ", ".join(set_parts)
+            values.extend([country, year])  # Add WHERE parameters
+            
+            update_sql = f"UPDATE life_expectancy SET {set_clause} WHERE country = ? AND year = ?"
+            cursor.execute(update_sql, tuple(values))
+            
+    except sqlite3.Error as e:
+        raise sqlite3.Error(f"Failed to update record: {e}")
 
 
 def delete_record(db_path: str, country: str, year: int) -> None:
@@ -386,7 +463,10 @@ def delete_record(db_path: str, country: str, year: int) -> None:
         ValueError: If no record found to delete
         sqlite3.Error: If database operation fails
     """
-    pass  # RED phase: Test written, implementation pending
+    # Use generalized delete_records function
+    deleted = delete_records(db_path, filters={"country": country, "year": year})
+    if deleted == 0:
+        raise ValueError(f"No record found for {country} in year {year}")
 
 
 def delete_records(db_path: str, filters: Dict[str, Any]) -> int:
@@ -409,7 +489,24 @@ def delete_records(db_path: str, filters: Dict[str, Any]) -> int:
         >>> delete_records("data.db", {"region": "Asia"})    # Delete all Asia records
         >>> delete_records("data.db", {"country": "China", "year": 2015})  # Delete specific record
     """
-    pass  # RED phase: Test written, implementation pending
+    if not db_path:
+        raise ValueError("Database path cannot be empty")
+    
+    if not filters:
+        raise ValueError("Filters cannot be empty (prevents accidental deletion of all records)")
+    
+    try:
+        with _get_connection_context(db_path) as conn:
+            cursor = conn.cursor()
+            
+            where_clause, values = _build_where_clause(filters)
+            delete_sql = f"DELETE FROM life_expectancy {where_clause}"
+            
+            cursor.execute(delete_sql, values)
+            return cursor.rowcount
+            
+    except sqlite3.Error as e:
+        raise sqlite3.Error(f"Failed to delete records: {e}")
 
 
 def delete_records_by_country(db_path: str, country: str) -> int:
@@ -426,4 +523,4 @@ def delete_records_by_country(db_path: str, country: str) -> int:
     Note:
         This is a convenience wrapper around delete_records().
     """
-    pass  # RED phase: Test written, implementation pending
+    return delete_records(db_path, filters={"country": country})
