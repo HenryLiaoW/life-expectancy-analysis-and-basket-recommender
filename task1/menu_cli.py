@@ -13,6 +13,7 @@ from task1.database_loader import get_all_records, create_record, update_record,
 from task1.data_filter import filter_by_country, filter_by_region, filter_by_year_range
 from task1.cleaner import clean_dataset
 from task1 import database_cleaner
+from task1.logger import get_logger
 
 
 class AnalysisSession:
@@ -203,6 +204,7 @@ def cmd_filter_country(session: AnalysisSession):
     country = input("\nEnter country name: ").strip()
     if country:
         session.apply_filter(country=country)
+        get_logger().log_filter("country", country)
         print(f"\n✅ Filtered to {len(session.filtered_data)} records")
     else:
         print("\n❌ No country entered")
@@ -223,6 +225,7 @@ def cmd_filter_region(session: AnalysisSession):
     region = input("\nEnter region: ").strip()
     if region:
         session.apply_filter(region=region)
+        get_logger().log_filter("region", region)
         print(f"\n✅ Filtered to {len(session.filtered_data)} records")
     else:
         print("\n❌ No region entered")
@@ -241,6 +244,7 @@ def cmd_filter_year_range(session: AnalysisSession):
         year_max = int(input("End year: ").strip())
         
         session.apply_filter(year_min=year_min, year_max=year_max)
+        get_logger().log_filter("year_range", f"{year_min}-{year_max}")
         print(f"\n✅ Filtered to {len(session.filtered_data)} records")
     except ValueError:
         print("\n❌ Invalid year numbers")
@@ -369,6 +373,7 @@ def cmd_database_cleaning(session: AnalysisSession):
             print("\n🔄 Executing cleaning operations...")
             results = database_cleaner.clean_database_full(session.db_path, dry_run=False)
             database_cleaner.print_cleaning_report(results)
+            get_logger().log_cleaning("DATABASE", f"Cleaned database: {sum(results.values())} operations")
             print("\n✅ Database cleaning completed!")
             
             # Reload data in session
@@ -410,6 +415,7 @@ def cmd_full_cleaning(session: AnalysisSession):
     session.cleaned_data = data
     session.is_cleaned = True
     
+    get_logger().log_cleaning("PIPELINE", f"In-memory cleaning: {len(data)} records cleaned")
     print(f"\n✅ Complete! {len(data)} records")
     input("Press Enter to continue...")
 
@@ -522,6 +528,7 @@ def cmd_export_csv(session: AnalysisSession):
     os.makedirs("task1/output", exist_ok=True)
     data.to_csv(filepath, index=False)
     
+    get_logger().log_export("CSV", filepath, len(data))
     print(f"\n✅ Exported {len(data)} records to:")
     print(f"   {filepath}")
     
@@ -551,6 +558,7 @@ def cmd_visualize_trends(session: AnalysisSession):
             show_chart=True
         )
         
+        get_logger().log_visualization("CHART", f"Life expectancy trend chart: {len(data)} records")
         print(f"\n✅ Chart saved to: {output_path}")
         
     except Exception as e:
@@ -610,6 +618,7 @@ def cmd_summary_table(session: AnalysisSession):
         print(f"\n🔄 Generating summary table grouped by {group_by}...")
         summary_df = generate_summary_table(data, group_by=group_by)
         
+        get_logger().log_visualization("TABLE", f"Summary table grouped by {group_by}: {len(data)} records")
         print("\n" + "="*80)
         print(f"SUMMARY TABLE - Grouped by {group_by.upper()}")
         print("="*80)
