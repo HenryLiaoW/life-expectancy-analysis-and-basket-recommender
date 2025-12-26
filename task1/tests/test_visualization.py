@@ -47,31 +47,23 @@ def test_chart_generation():
     print("\n📋 Step 3: Generating chart with visualization.py...")
     output_path = "task1/output/test_life_expectancy_trends.png"
     
-    try:
-        result_path = generate_life_expectancy_trend_chart(
-            data=china_data,
-            output_path=output_path,
-            dpi=300,
-            show_chart=False  # Don't show in test
-        )
-        print(f"✅ Chart generated: {result_path}")
-    except Exception as e:
-        print(f"❌ Error generating chart: {e}")
-        return False
+    result_path = generate_life_expectancy_trend_chart(
+        data=china_data,
+        output_path=output_path,
+        dpi=300,
+        show_chart=False  # Don't show in test
+    )
+    print(f"✅ Chart generated: {result_path}")
     
     # Verify file exists
     print("\n📋 Step 4: Verifying output file...")
-    if not os.path.exists(output_path):
-        print(f"❌ Output file not found: {output_path}")
-        return False
+    assert os.path.exists(output_path), f"Output file not found: {output_path}"
     
     # Check file size
     file_size = os.path.getsize(output_path)
     print(f"✅ File size: {file_size:,} bytes")
     
-    if file_size < 10000:  # Less than 10KB might indicate an error
-        print(f"⚠️  File size seems small, might be an issue")
-        return False
+    assert file_size >= 10000, f"File size too small: {file_size} bytes (expected >= 10KB)"
     
     print("\n" + "="*60)
     print("🎉 Visualization test PASSED!")
@@ -81,8 +73,6 @@ def test_chart_generation():
     print(f"   DPI: 300")
     print(f"   Countries: China")
     print(f"   Years: {china_data['year'].min()} - {china_data['year'].max()}")
-    
-    return True
 
 
 def test_table_generation():
@@ -95,9 +85,7 @@ def test_table_generation():
     print("\n📋 Step 1: Loading data from CLI_demo.db...")
     db_path = "task1/data/CLI_demo.db"
     
-    if not os.path.exists(db_path):
-        print(f"❌ Database not found: {db_path}")
-        return False
+    assert os.path.exists(db_path), f"Database not found: {db_path}"
     
     records = get_all_records(db_path)
     data = pd.DataFrame(records)
@@ -105,31 +93,23 @@ def test_table_generation():
     
     # Generate summary table
     print("\n📋 Step 2: Generating summary table...")
-    try:
-        summary_df = generate_summary_table(
-            data=data,
-            group_by='country'
-        )
-        print(f"✅ Generated summary table with {len(summary_df)} rows")
-        print("\n📊 Summary Table Preview:")
-        print(summary_df.to_string())
-    except Exception as e:
-        print(f"❌ Error generating table: {e}")
-        return False
+    summary_df = generate_summary_table(
+        data=data,
+        group_by='country'
+    )
+    print(f"✅ Generated summary table with {len(summary_df)} rows")
+    print("\n📊 Summary Table Preview:")
+    print(summary_df.to_string())
     
     # Verify table structure
     print("\n📋 Step 3: Verifying table structure...")
-    if len(summary_df) == 0:
-        print("❌ Table is empty")
-        return False
+    assert len(summary_df) > 0, "Table is empty"
     
     print(f"✅ Table has {len(summary_df)} rows and {len(summary_df.columns)} columns")
     
     print("\n" + "="*60)
     print("🎉 Pandas table test PASSED!")
     print("="*60)
-    
-    return True
 
 
 if __name__ == "__main__":

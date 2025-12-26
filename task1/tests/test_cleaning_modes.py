@@ -40,7 +40,7 @@ def test_pipeline_mode():
     create_db_from_csv(cleaned_csv, pipeline_db, use_demo_data=False)
     
     print("\n✅ Pipeline Mode Test PASSED")
-    return pipeline_db
+    assert os.path.exists(pipeline_db), f"Pipeline database not created: {pipeline_db}"
 
 
 def test_database_mode():
@@ -61,7 +61,7 @@ def test_database_mode():
     print_cleaning_report(results)
     
     print("\n✅ Database Mode Test PASSED")
-    return db_mode_db
+    assert os.path.exists(db_mode_db), f"Database mode database not created: {db_mode_db}"
 
 
 def compare_results(pipeline_db, db_mode_db):
