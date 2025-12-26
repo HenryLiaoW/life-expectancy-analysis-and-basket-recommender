@@ -21,11 +21,11 @@ from task1.data_filter import (
 
 def demo_filtering():
     """Demonstrate: conditional data filtering"""
-    print("="*70)
+    print("\n" + "="*50)
     print("1. Conditional Data Filtering")
-    print("="*70)
+    print("="*50)
     
-    db_path = "task1/data/demo.db"
+    db_path = "task1/data/CLI_demo.db"
     df = get_data_as_dataframe(db_path)
     
     print(f"\nOriginal data: {len(df)} records")
@@ -33,7 +33,7 @@ def demo_filtering():
     # 1.1 Filter by country
     china_data = filter_by_country(df, "China")
     print(f"\n✅ Filter by country (China): {len(china_data)} records")
-    print(china_data[["country", "year", "life_expect"]].head())
+    print(china_data[["year", "life_expect"]].to_string(index=False))
     
     # 1.2 Filter by date range
     recent_data = filter_by_year_range(df, 2016, 2017)
@@ -56,11 +56,11 @@ def demo_filtering():
 
 def demo_summary_statistics():
     """Demonstrate: generate summary statistics"""
-    print("\n" + "="*70)
+    print("\n" + "="*50)
     print("2. Summary Statistics")
-    print("="*70)
+    print("="*50)
     
-    db_path = "task1/data/demo.db"
+    db_path = "task1/data/CLI_demo.db"
     df = get_data_as_dataframe(db_path)
     
     # 2.1 Global statistics
@@ -86,16 +86,21 @@ def demo_summary_statistics():
 
 def demo_trends_over_time():
     """Demonstrate: trends over time"""
-    print("\n" + "="*70)
+    print("\n" + "="*50)
     print("3. Trends Over Time")
-    print("="*70)
+    print("="*50)
     
-    db_path = "task1/data/demo.db"
+    db_path = "task1/data/CLI_demo.db"
     
     # 3.1 Single country trend
     print("\n✅ China life expectancy trend (2015-2017):")
     china_trend = get_country_trend(db_path, "China", "life_expect")
-    print(china_trend.to_string(index=False))
+    print("\n" + china_trend[["year", "life_expect"]].to_string(index=False))
+    
+    # Show trend direction
+    if len(china_trend) > 1:
+        trend_diff = china_trend["life_expect"].iloc[-1] - china_trend["life_expect"].iloc[0]
+        print(f"\n   Trend: {'↗️ Improving' if trend_diff > 0 else '↘️ Declining'} ({trend_diff:+.1f} years)")
     
     # 3.2 Multiple indicators trend
     print("\n✅ China basic water access trend:")
@@ -111,11 +116,11 @@ def demo_trends_over_time():
 
 def demo_grouped_results():
     """Demonstrate: grouped results"""
-    print("\n" + "="*70)
+    print("\n" + "="*50)
     print("4. Grouped Results (by country, region)")
-    print("="*70)
+    print("="*50)
     
-    db_path = "task1/data/demo.db"
+    db_path = "task1/data/CLI_demo.db"
     df = get_data_as_dataframe(db_path)
     
     # 4.1 Country comparison (latest year)
@@ -150,11 +155,11 @@ def demo_grouped_results():
 
 def demo_advanced_use_case():
     """Demonstrate: advanced use case - combining multiple features"""
-    print("\n" + "="*70)
-    print("5. Advanced Use Case - Regional Historical Comparison")
-    print("="*70)
+    print("\n" + "="*50)
+    print("5. Advanced Use Case - Regional Comparison")
+    print("="*50)
     
-    db_path = "task1/data/demo.db"
+    db_path = "task1/data/CLI_demo.db"
     df = get_data_as_dataframe(db_path)
     
     print("\n✅ Asia vs Americas water access comparison (2015-2017):")
@@ -179,12 +184,12 @@ if __name__ == "__main__":
     demo_grouped_results()
     demo_advanced_use_case()
     
-    print("\n" + "="*70)
-    print("✅ All filtering and summary demonstrations completed!")
-    print("="*70)
-    print("\nCore capabilities summary:")
+    print("\n" + "="*50)
+    print("✅ All demonstrations completed!")
+    print("="*50)
+    print("\nCore capabilities:")
     print("  1. ✅ Filter by country/date/region")
-    print("  2. ✅ Generate statistical summaries (mean/min/max/count/median/std)")
+    print("  2. ✅ Statistical summaries")
     print("  3. ✅ Analyze trends over time")
-    print("  4. ✅ Group comparison (by country/region)")
-    print("  5. ✅ Combine features for complex queries")
+    print("  4. ✅ Group comparison")
+    print("  5. ✅ Complex queries")
