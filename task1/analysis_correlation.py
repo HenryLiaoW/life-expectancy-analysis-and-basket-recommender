@@ -109,20 +109,43 @@ def run_correlation_analysis(
     # ========================================================================
     # PRIMARY PREDICTORS (low-missing group, pre-selected for analysis)
     # ========================================================================
+    # NOTE: This exploratory analysis includes ALL available indicators
+    # to provide a comprehensive correlation overview.
+    #
+    # ⚠️ CIRCULAR DEFINITIONS (correlated by definition, NOT policy-modifiable):
+    #    - adult_mortality: Component of life expectancy calculation
+    #    - infant_mort: Directly affects population life expectancy
+    #    - age1-4mort: Early-life mortality component
+    #    - life_exp60: Derived from overall life expectancy
+    #
+    # ✅ MODIFIABLE FACTORS (actionable through policy interventions):
+    #    - basic_water: Infrastructure investment
+    #    - gghe-d: Healthcare spending allocation
+    #    - bmi: Nutrition and food security programs
+    #    - alcohol: Public health regulations
+    #
+    # These circular definitions are EXCLUDED from downstream policy modules
+    # (see data_filter.py: get_policy_intervention_priorities)
+    
     predictors = [
-        "adult_mortality",
-        "infant_mort",
-        "age1-4mort",
-        "bmi",
-        "alcohol",
-        "basic_water",
-        "gghe-d",
+        # Circular definitions (exploratory only, excluded from policy recommendations)
+        "adult_mortality",      # r ≈ -0.72 (by definition)
+        "infant_mort",          # r ≈ -0.81 (by definition)
+        "age1-4mort",           # r ≈ -0.77 (by definition)
+        "life_exp60",           # r ≈ +0.99 (derived from life_expect)
+        
+        # Modifiable factors (used in policy prioritization)
+        "basic_water",          # r ≈ +0.83 (infrastructure)
+        "gghe-d",               # r ≈ +0.61 (healthcare spending)
+        "bmi",                  # r ≈ +0.60 (nutrition)
+        "alcohol",              # r ≈ +0.42 (public health)
+        
+        # Other indicators (exploratory)
         "che_gdp",
         "une_pop",
         "une_infant",
         "une_life",
         "une_gni",
-        "life_exp60",  # included but discussed as highly correlated by definition
     ]
     
     # ========================================================================

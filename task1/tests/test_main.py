@@ -21,7 +21,7 @@ from io import StringIO
 from unittest.mock import patch, MagicMock
 
 # Import the module to be tested
-from task1.main_cli import (
+from task1.main import (
     print_welcome,
     print_main_menu,
     run_data_analysis,

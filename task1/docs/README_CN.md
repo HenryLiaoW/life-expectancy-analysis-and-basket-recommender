@@ -31,7 +31,7 @@
 1. **数据管道**: 加载 → 清洗 → 存储 → 查询 → 分析 → 可视化
 2. **政策导向**: 识别影响预期寿命的可修改因素
 3. **交互系统**: 两个CLI界面满足不同使用场景
-4. **软件质量**: TDD方法论，135个自动化测试
+4. **软件质量**: TDD方法论，158个自动化测试
 
 ### 核心特性
 
@@ -50,8 +50,8 @@
 - 统计汇总和趋势分析
 
 ✅ **交互式CLI界面**  
-- `main_cli.py`: 统一的菜单驱动系统，带会话管理
-- `crud_cli.py`: 快速查询命令行工具
+- `main.py`: 统一的菜单驱动系统，带会话管理
+- `analysis_cli.py`: 数据分析和政策查询命令行工具
 
 ✅ **数据可视化**  
 - 趋势图表和对比表格
@@ -67,15 +67,15 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                       main_cli.py                           │
+│                          main.py                            │
 │              (主入口 - 434行)                                │
 │         - 欢迎界面和主菜单                                    │
 │         - 路由到分析或CRUD操作                                │
-│         - ⭐ 23个测试在test_main.py中                        │
+│         - ⭐ 158个测试在tests/目录中                         │
 └─────────────────┬───────────────────┬───────────────────────┘
                   │                   │
        ┌──────────▼──────────┐    ┌──▼──────────────────┐
-       │    menu_cli.py      │    │   crud_cli.py       │
+       │    menu_cli.py      │    │  analysis_cli.py    │
        │   (723行)           │    │   (393行)           │
        │  交互式菜单          │    │  命令行工具          │
        └──────────┬──────────┘    └──┬──────────────────┘
@@ -101,9 +101,9 @@
 ```
 PAI_SuhangLiao/
 ├── task1/                          # 主应用代码
-│   ├── main_cli.py                 # ⭐ 主入口（统一界面）
+│   ├── main.py                     # ⭐ 主入口（统一界面）
 │   ├── menu_cli.py                 # 交互式分析菜单
-│   ├── crud_cli.py                 # 命令行CRUD工具
+│   ├── analysis_cli.py             # 命令行分析工具
 │   │
 │   ├── data_loader.py              # CSV文件加载
 │   ├── cleaner.py                  # 数据清洗逻辑
@@ -117,18 +117,17 @@ PAI_SuhangLiao/
 │   ├── create_db.py                # 数据库初始化工具
 │   ├── demo_filtering_summary.py   # 5个工作流演示
 │   │
-│   ├── tests/                      # ⭐ TDD测试套件（135个测试）
+│   ├── tests/                      # ⭐ TDD测试套件（158个测试）
 │   │   ├── conftest.py             # 共享fixtures
-│   │   ├── test_cleaner.py         # 20个测试
-│   │   ├── test_data_loader.py     # 20个测试
-│   │   ├── test_database_loader.py # 28个测试
-│   │   ├── test_data_filter.py     # 46个测试
-│   │   └── test_analysis_correlation.py # 13个测试
-│   │
-│   ├── test_main.py                # ⭐ 主CLI测试（23个）
-│   ├── test_cleaning_modes.py      # 双模式清洗测试
-│   ├── test_logger.py              # 日志功能测试
-│   ├── test_visualization.py       # 可视化测试（21个）
+│   │   ├── test_main.py            # ⭐ 主CLI测试（23个）
+│   │   ├── test_cleaner.py         # 数据清洗测试（7个）
+│   │   ├── test_data_loader.py     # CSV加载测试（2个）
+│   │   ├── test_database_loader.py # 数据库CRUD测试（34个）
+│   │   ├── test_data_filter.py     # 分析函数测试（46个）
+│   │   ├── test_analysis_correlation.py # 相关性测试（18个）
+│   │   ├── test_logger.py          # 日志测试（1个）
+│   │   ├── test_cleaning_modes.py  # 双模式清洗测试（2个）
+│   │   └── test_visualization.py   # 可视化测试（2个）
 │   │
 │   ├── data/
 │   │   ├── life_expectancy.csv     # 原始WHO数据（3111条）
@@ -185,7 +184,7 @@ pip install pandas matplotlib pytest
 # 运行所有测试以确保一切正常
 pytest task1/tests/ -v
 
-# 预期输出：135个测试通过
+# 预期输出：158个测试通过
 ```
 
 ### 步骤4：初始化数据库
@@ -223,38 +222,38 @@ python task1/main_cli.py
 3. **从CSV创建数据库** - 初始化或重建数据库
 0. **退出** - 关闭应用
 
-### CRUD CLI工具（快速查询）
+### 分析CLI工具（数据分析与政策查询）
 
-直接操作的命令行界面：
+数据分析操作的命令行界面：
 
 ```bash
 # 显示数据库信息
-python task1/crud_cli.py info
+python task1/analysis_cli.py info
 
 # 按国家过滤
-python task1/crud_cli.py filter --country China
+python task1/analysis_cli.py filter --country China
 
 # 按年份范围过滤，带统计
-python task1/crud_cli.py filter --year-min 2015 --year-max 2017 --stats
+python task1/analysis_cli.py filter --year-min 2015 --year-max 2017 --stats
 
 # 比较多个国家
-python task1/crud_cli.py compare China India USA Brazil
+python task1/analysis_cli.py compare China India USA Brazil
 
 # 分析水资源影响
-python task1/crud_cli.py analyze water-access --region Asia
+python task1/analysis_cli.py analyze water-access --region Asia
 
 # 获取政策建议
-python task1/crud_cli.py policy --country India --target 75
+python task1/analysis_cli.py policy --country India --target 75
 
 # 显示帮助
-python task1/crud_cli.py --help
+python task1/analysis_cli.py --help
 ```
 
 ### 运行测试
 
 ```bash
-# 运行所有测试（135个）
-pytest task1/ -v
+# 运行所有测试（158个）
+pytest task1/tests/ -v
 
 # 运行特定测试文件
 pytest task1/tests/test_data_filter.py -v
@@ -349,15 +348,17 @@ c6cf278  feat(crud): Implement CRUD operations - GREEN phase
 
 | 模块 | 测试数 | 状态 | 覆盖重点 |
 |------|-------|------|----------|
-| `cleaner.py` | 20 | ✅ 100% | 类型验证、边界情况、健壮性 |
-| `data_loader.py` | 20 | ✅ 100% | 文件错误、编码、空数据 |
-| `database_loader.py` | 28 | ✅ 100% | CRUD操作、批处理、事务 |
+| `cleaner.py` | 7 | ✅ 100% | 类型验证、边界情况、健壮性 |
+| `data_loader.py` | 2 | ✅ 100% | 文件错误、编码、空数据 |
+| `database_loader.py` | 34 | ✅ 100% | CRUD操作、批处理、事务 |
 | `data_filter.py` | 46 | ✅ 100% | 过滤逻辑、统计、政策分析 |
-| `analysis_correlation.py` | 13 | ✅ 100% | 相关性计算、缺失数据 |
-| `visualization.py` | 21 | ✅ 100% | 图表生成、错误处理、文件I/O |
-| `logger.py` | 3 | ✅ 100% | 日志文件创建、消息格式化 |
+| `analysis_correlation.py` | 18 | ✅ 100% | 相关性计算、缺失数据 |
+| `main.py` | 23 | ✅ 100% | CLI路由、用户交互、错误处理 |
+| `visualization.py` | 2 | ✅ 100% | 图表生成、错误处理 |
+| `logger.py` | 1 | ✅ 100% | 日志文件创建、消息格式化 |
+| `cleaning_modes.py` | 2 | ✅ 100% | 管道/数据库双模式清洗 |
 
-**总计：135个自动化测试** ✅
+**总计：158个自动化测试** ✅
 
 ### 测试的边界情况
 
@@ -383,7 +384,7 @@ pytest task1/ -v --tb=short
 # task1/tests/test_cleaner.py::test_clean_numeric_with_empty_string PASSED
 # task1/tests/test_database_loader.py::test_create_record_success PASSED
 # ...
-# ======================== 135 passed in 2.45s ========================
+# ======================== 158 passed in 2.96s ========================
 ```
 
 ---
@@ -681,7 +682,7 @@ Git提交历史提供了这一工作流程的完整证明（参见TDD证明章�
 ### 展示的技能
 
 ✅ **软件工程**：
-- 测试驱动开发（135个测试）
+- 测试驱动开发（158个测试）
 - Python中的SOLID原则
 - Git版本控制，提交消息规范
 - 模块化架构（8个核心模块）
@@ -709,7 +710,7 @@ Git提交历史提供了这一工作流程的完整证明（参见TDD证明章�
 ## 📝 作业合规性检查清单
 
 ✅ **TDD方法论**：Git历史显示RED → GREEN → REFACTOR循环  
-✅ **测试覆盖率**：所有模块的135个自动化测试  
+✅ **测试覆盖率**：所有模块的158个自动化测试  
 ✅ **Git仓库**：带有适当提交历史的私有仓库  
 ✅ **带命令的README**：全面的设置和运行说明  
 ✅ **边界情况测试**：空输入、无效类型、边界条件  

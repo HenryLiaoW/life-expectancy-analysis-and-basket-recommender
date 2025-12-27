@@ -15,5 +15,16 @@ venv/
 .DS_Store
 *.db
 
-# Assessment documents (internal review)
-docs/TASK1_ASSESSMENT.md
+# Task1 documentation (internal review/development only)
+# Keep: README.md, README_CN.md, FURPS_ANALYSIS.md, SOLID_PRINCIPLES_ANALYSIS.md/CN
+task1/docs/CLI_ARCHITECTURE.md
+task1/docs/DATA_FILTER_ARCHITECTURE.md
+task1/docs/DATA_FILTER_QUICK_REFERENCE.md
+task1/docs/IMPROVEMENTS_SUMMARY.md
+task1/docs/PROJECT_INTRO_FOR_GPT.md
+task1/docs/RECENT_CHANGES_SUMMARY.md
+task1/docs/REFLECTIVE_REPORT.md
+task1/docs/REQUIREMENTS_ANALYSIS.md
+task1/docs/REQUIREMENTS_ANALYSIS_CN.md
+task1/docs/ROBUSTNESS_ANALYSIS.md
+task1/docs/TASK1_ASSESSMENT.md

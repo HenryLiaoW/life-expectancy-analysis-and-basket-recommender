@@ -4,9 +4,25 @@ Data Filter Module - Policy-Oriented Health Data Analysis
 This module provides data filtering and statistical analysis focused on
 **modifiable factors** that can inform public health policy interventions.
 
-Based on correlation analysis findings:
-- Modifiable factors: basic_water (r=0.831), gghe-d (r=0.610), bmi (r=0.598)
-- Circular definitions excluded: infant_mort, adult_mortality (correlation by definition)
+Methodological Foundation:
+    Based on exploratory correlation analysis (see analysis_correlation.py),
+    this module focuses ONLY on actionable modifiable factors:
+    
+    ✅ Modifiable factors (actionable through policy):
+       - basic_water (r=0.831): Infrastructure investment
+       - gghe-d (r=0.610): Healthcare spending allocation
+       - bmi (r=0.598): Nutrition and food security programs
+    
+    ⚠️ Circular definitions (EXCLUDED from policy recommendations):
+       - infant_mort, adult_mortality, age1-4mort, life_exp60
+       - These correlate strongly but are CONSEQUENCES, not causes
+       - Cannot be directly modified through policy interventions
+    
+    Academic Rationale:
+       While infant mortality shows strong correlation (r ≈ -0.81), it is
+       a component of life expectancy by definition, not an independent
+       modifiable factor. Policy interventions should target root causes
+       (water access, healthcare spending) rather than outcome metrics.
 
 Key Features:
 - Basic data filtering (country, year range, region)
@@ -388,6 +404,22 @@ def get_policy_intervention_priorities(
     Analyzes gap between current state and target, then recommends
     which modifiable factors to prioritize for maximum impact.
     
+    Methodological Design:
+        This function uses ONLY modifiable factors that can be directly
+        addressed through policy interventions:
+        
+        ✅ basic_water (r=0.831): Infrastructure investment
+        ✅ gghe-d (r=0.610): Healthcare spending allocation
+        ✅ bmi (r=0.598): Nutrition programs
+        
+        ⚠️ Deliberately EXCLUDES circular definitions:
+           - infant_mort, adult_mortality (consequences, not causes)
+           - These correlate strongly but cannot be directly modified
+        
+        Impact Estimation:
+           Uses conservative estimate: correlation × gap × 0.1
+           This is exploratory, NOT predictive modeling
+    
     Args:
         df: Input DataFrame
         country: Target country name
@@ -401,6 +433,12 @@ def get_policy_intervention_priorities(
         
     Raises:
         ValueError: If country not found or target is below current value
+        
+    Example:
+        >>> result = get_policy_intervention_priorities(df, "India", 75.0)
+        >>> print(result['top_priorities'][0])
+        {'factor': 'basic_water', 'correlation': 0.831, 
+         'estimated_impact_years': 2.5}
     """
     country_df = filter_by_country(df, country)
     
@@ -416,11 +454,30 @@ def get_policy_intervention_priorities(
     
     current_gap = target_life_expectancy - current_life_expect
     
-    # Analyze modifiable factors (based on correlation strength)
+    # ========================================================================
+    # MODIFIABLE FACTORS FOR POLICY RECOMMENDATIONS
+    # ========================================================================
+    # Based on correlation analysis (see analysis_correlation.py)
+    # 
+    # ✅ INCLUDED (modifiable through policy interventions):
+    #    - basic_water: Infrastructure can be built
+    #    - gghe-d: Budget allocation can be adjusted
+    #    - bmi: Nutrition programs can be implemented
+    #
+    # ⚠️ EXCLUDED (circular definitions, consequences not causes):
+    #    - infant_mort (r ≈ -0.81): Component of life_expect by definition
+    #    - adult_mortality (r ≈ -0.72): Component of life_expect by definition
+    #    - age1-4mort (r ≈ -0.77): Early mortality component
+    #    - life_exp60 (r ≈ +0.99): Derived from life_expect
+    #
+    # Academic Rationale:
+    #    While mortality indicators correlate strongly, they are OUTCOMES
+    #    of underlying modifiable factors, not independent policy levers.
+    # ========================================================================
     factors = [
-        {"name": "basic_water", "correlation": 0.831},
-        {"name": "gghe-d", "correlation": 0.610},
-        {"name": "bmi", "correlation": 0.598}
+        {"name": "basic_water", "correlation": 0.831},  # Infrastructure investment
+        {"name": "gghe-d", "correlation": 0.610},       # Healthcare spending
+        {"name": "bmi", "correlation": 0.598}           # Nutrition programs
     ]
     
     priorities = []
