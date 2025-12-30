@@ -87,3 +87,15 @@ class RecommendationEngine:
             items: List of items in new transaction
         """
         pass
+    
+    def get_pair_count(self, item1, item2):
+        """
+        Get co-occurrence count between two items (for testing)
+        
+        Args:
+            item1, item2: Item names
+            
+        Returns:
+            int: Co-occurrence count
+        """
+        return 0

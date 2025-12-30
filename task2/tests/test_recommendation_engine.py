@@ -235,14 +235,15 @@ class TestUpdateWithTransaction:
     
     def test_update_with_transaction_increments_frequency(self, engine):
         """Test increments co-occurrence frequency"""
-        # Get initial weight (needs exposed method)
-        initial_count = engine.check_co_purchase('whole milk', 'bread', threshold=0)
+        # Get initial count
+        initial_count = engine.get_pair_count('whole milk', 'bread')
         
         # Add new transaction
         engine.update_with_transaction(['whole milk', 'bread'])
         
-        # Verify relationship still exists (frequency increased)
-        assert engine.check_co_purchase('whole milk', 'bread', threshold=0)
+        # Verify frequency increased
+        new_count = engine.get_pair_count('whole milk', 'bread')
+        assert new_count == initial_count + 1
     
     def test_update_with_transaction_affects_recommendations(self, engine):
         """Test updates affect recommendation results"""
