@@ -14,7 +14,9 @@ class GraphAdjacencyList:
     
     def __init__(self):
         """Initialize empty graph"""
-        pass
+        self.graph = defaultdict(lambda: defaultdict(int))
+        self.items = set()
+        self.num_edges = 0
     
     def build_from_csv(self, csv_path):
         """
@@ -23,7 +25,25 @@ class GraphAdjacencyList:
         Args:
             csv_path: Path to CSV file
         """
-        pass
+        csv_file = Path(csv_path)
+        if not csv_file.exists():
+            raise FileNotFoundError(f"CSV file not found: {csv_path}")
+        
+        # Group items by basket (member, date)
+        baskets = defaultdict(list)
+        
+        with open(csv_file, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                member = row['Member_number']
+                date = row['Date']
+                item = row['itemDescription']
+                basket_key = (member, date)
+                baskets[basket_key].append(item)
+        
+        # Build graph from baskets
+        for basket_items in baskets.values():
+            self.add_transaction(basket_items)
     
     def add_transaction(self, items):
         """
@@ -32,7 +52,22 @@ class GraphAdjacencyList:
         Args:
             items: List of items (one basket)
         """
-        pass
+        # Deduplicate items in basket
+        unique_items = list(set(items))
+        
+        # Update item set
+        self.items.update(unique_items)
+        
+        # Create edges for all pairs
+        for i in range(len(unique_items)):
+            for j in range(i + 1, len(unique_items)):
+                item1, item2 = unique_items[i], unique_items[j]
+                # Check if edge is new
+                if self.graph[item1][item2] == 0:
+                    self.num_edges += 1
+                # Symmetric update for undirected graph
+                self.graph[item1][item2] += 1
+                self.graph[item2][item1] += 1
     
     def get_neighbors(self, item):
         """
@@ -44,7 +79,9 @@ class GraphAdjacencyList:
         Returns:
             dict[str, int]: {neighbor_item: co-occurrence_count}
         """
-        return {}
+        if item not in self.graph:
+            return {}
+        return dict(self.graph[item])
     
     def get_top_neighbors(self, item, top_k=5):
         """
@@ -57,7 +94,13 @@ class GraphAdjacencyList:
         Returns:
             list[tuple]: [(item, count), ...], sorted by count descending
         """
-        return []
+        neighbors = self.get_neighbors(item)
+        if not neighbors:
+            return []
+        
+        # Sort by count descending, then by name for stability
+        sorted_neighbors = sorted(neighbors.items(), key=lambda x: (-x[1], x[0]))
+        return sorted_neighbors[:top_k]
     
     def get_edge_weight(self, item1, item2):
         """
@@ -69,7 +112,7 @@ class GraphAdjacencyList:
         Returns:
             int: Co-occurrence count, 0 if not exists
         """
-        return 0
+        return self.graph.get(item1, {}).get(item2, 0)
     
     def has_item(self, item):
         """
@@ -81,7 +124,7 @@ class GraphAdjacencyList:
         Returns:
             bool: True if exists
         """
-        return False
+        return item in self.items
     
     def get_all_items(self):
         """
@@ -90,4 +133,4 @@ class GraphAdjacencyList:
         Returns:
             list[str]: List of item names
         """
-        return []
+        return list(self.items)

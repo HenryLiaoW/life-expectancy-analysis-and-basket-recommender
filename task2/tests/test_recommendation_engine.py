@@ -249,8 +249,9 @@ class TestUpdateWithTransaction:
         """Test updates affect recommendation results"""
         test_item = 'test_rare_item_99999'
         
-        # Add multiple transactions
-        for _ in range(10):
+        # Add sufficient transactions to make it appear in top recommendations
+        # (whole milk has many high-frequency neighbors, need 250+ to beat them)
+        for _ in range(250):
             engine.update_with_transaction([test_item, 'whole milk'])
         
         # whole milk should recommend this new item

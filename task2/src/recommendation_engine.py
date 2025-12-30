@@ -12,7 +12,7 @@ class RecommendationEngine:
     
     def __init__(self):
         """Initialize recommendation engine"""
-        pass
+        self.graph = GraphAdjacencyList()
     
     def load_data(self, csv_path):
         """
@@ -21,7 +21,7 @@ class RecommendationEngine:
         Args:
             csv_path: Path to CSV file
         """
-        pass
+        self.graph.build_from_csv(csv_path)
     
     def recommend_for_item(self, item, top_k=5):
         """
@@ -35,7 +35,7 @@ class RecommendationEngine:
         Returns:
             list[tuple]: [(recommended_item, co-purchase_count), ...]
         """
-        return []
+        return self.graph.get_top_neighbors(item, top_k)
     
     def get_most_frequent_pairs(self, top_k=10):
         """
@@ -48,7 +48,22 @@ class RecommendationEngine:
         Returns:
             list[tuple]: [((item1, item2), count), ...]
         """
-        return []
+        # Collect all edges
+        pairs = []
+        seen = set()
+        
+        for item1 in self.graph.get_all_items():
+            neighbors = self.graph.get_neighbors(item1)
+            for item2, count in neighbors.items():
+                # Avoid duplicates: (A,B) and (B,A) are same
+                pair_key = tuple(sorted([item1, item2]))
+                if pair_key not in seen:
+                    seen.add(pair_key)
+                    pairs.append((pair_key, count))
+        
+        # Sort by count descending, then by pair for stability
+        sorted_pairs = sorted(pairs, key=lambda x: (-x[1], x[0]))
+        return sorted_pairs[:top_k]
     
     def check_co_purchase(self, item1, item2, threshold=50):
         """
@@ -62,7 +77,8 @@ class RecommendationEngine:
         Returns:
             bool: True if frequently co-purchased
         """
-        return False
+        count = self.graph.get_edge_weight(item1, item2)
+        return count >= threshold
     
     def recommend_for_basket(self, basket, top_k=5):
         """
@@ -76,7 +92,22 @@ class RecommendationEngine:
         Returns:
             list[tuple]: [(recommended_item, aggregated_score), ...]
         """
-        return []
+        if not basket:
+            return []
+        
+        # Aggregate scores from all basket items
+        from collections import defaultdict
+        scores = defaultdict(int)
+        
+        for item in basket:
+            neighbors = self.graph.get_neighbors(item)
+            for neighbor, count in neighbors.items():
+                if neighbor not in basket:  # Exclude items already in basket
+                    scores[neighbor] += count
+        
+        # Sort by score descending, then by name for stability
+        sorted_items = sorted(scores.items(), key=lambda x: (-x[1], x[0]))
+        return sorted_items[:top_k]
     
     def update_with_transaction(self, items):
         """
@@ -86,7 +117,7 @@ class RecommendationEngine:
         Args:
             items: List of items in new transaction
         """
-        pass
+        self.graph.add_transaction(items)
     
     def get_pair_count(self, item1, item2):
         """
@@ -98,4 +129,4 @@ class RecommendationEngine:
         Returns:
             int: Co-occurrence count
         """
-        return 0
+        return self.graph.get_edge_weight(item1, item2)
