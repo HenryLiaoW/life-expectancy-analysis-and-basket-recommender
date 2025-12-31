@@ -2,17 +2,33 @@
 Recommendation Engine (Business Logic Layer)
 
 Encapsulates recommendation system business logic, calls Graph layer to implement features
+
+Design Pattern: Dependency Injection - depends on Graph abstraction, not concrete implementation
 """
 
+from typing import Optional
+from task2.src.graph_interface import Graph
 from task2.src.graph_adjacency_list import GraphAdjacencyList
 
 
 class RecommendationEngine:
-    """Recommendation Engine"""
+    """
+    Recommendation Engine with dependency injection.
     
-    def __init__(self):
-        """Initialize recommendation engine"""
-        self.graph = GraphAdjacencyList()
+    Design Principles:
+    - Dependency Inversion: Depends on Graph interface, not concrete class
+    - Open/Closed: Can accept any Graph implementation without modification
+    """
+    
+    def __init__(self, graph: Optional[Graph] = None):
+        """
+        Initialize recommendation engine with dependency injection.
+        
+        Args:
+            graph: Graph implementation (defaults to GraphAdjacencyList if not provided)
+                   Accepts any class implementing Graph interface (DIP principle)
+        """
+        self.graph = graph if graph is not None else GraphAdjacencyList()
     
     def load_data(self, csv_path):
         """

@@ -2,21 +2,33 @@
 Graph Adjacency List Implementation (Data Structure Layer)
 
 Stores item co-occurrence relationships using dict[str, dict[str, int]]
+
+Design Pattern: Implements Graph interface for dependency inversion
 """
 
 from pathlib import Path
 import csv
 from collections import defaultdict
+from task2.src.graph_interface import Graph
 
 
-class GraphAdjacencyList:
-    """Adjacency list graph data structure"""
+class GraphAdjacencyList(Graph):
+    """
+    Adjacency list graph data structure implementation.
+    
+    Implements Graph interface to support polymorphism and SOLID principles.
+    """
     
     def __init__(self):
         """Initialize empty graph"""
         self.graph = defaultdict(lambda: defaultdict(int))
         self.items = set()
-        self.num_edges = 0
+        self._num_edges = 0
+    
+    @property
+    def num_edges(self) -> int:
+        """Get total number of edges (implements Graph interface)"""
+        return self._num_edges
     
     def build_from_csv(self, csv_path):
         """
@@ -64,7 +76,7 @@ class GraphAdjacencyList:
                 item1, item2 = unique_items[i], unique_items[j]
                 # Check if edge is new
                 if self.graph[item1][item2] == 0:
-                    self.num_edges += 1
+                    self._num_edges += 1
                 # Symmetric update for undirected graph
                 self.graph[item1][item2] += 1
                 self.graph[item2][item1] += 1
