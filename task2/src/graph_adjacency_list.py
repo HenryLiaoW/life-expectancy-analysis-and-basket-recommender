@@ -146,3 +146,95 @@ class GraphAdjacencyList(Graph):
             list[str]: List of item names
         """
         return list(self.items)
+    
+    def visualize_subgraph(self, center_item, max_neighbors=10):
+        """
+        Generate ASCII visualization of item's neighborhood
+        
+        Args:
+            center_item: Central item to visualize
+            max_neighbors: Max neighbors to show
+            
+        Returns:
+            str: ASCII visualization or error message
+        """
+        if not self.has_item(center_item):
+            return f"Item '{center_item}' not found"
+        
+        neighbors = self.get_top_neighbors(center_item, max_neighbors)
+        if not neighbors:
+            return f"No neighbors found for '{center_item}'"
+        
+        total_neighbors = len(self.get_neighbors(center_item))
+        
+        lines = []
+        
+        # Add notice if actual neighbors less than requested
+        if total_neighbors < max_neighbors:
+            lines.append(f"\n✓ Found only {total_neighbors} neighbors for '{center_item}'\n")
+        
+        lines.append(f"{'='*70}")
+        lines.append(f"SUBGRAPH VISUALIZATION: {center_item}")
+        lines.append(f"{'='*70}")
+        lines.append(f"Center Node: [{center_item}]")
+        lines.append(f"Total Neighbors: {total_neighbors}")
+        lines.append(f"Showing Top {len(neighbors)} Neighbors")
+        lines.append(f"{'-'*70}\n")
+        
+        for i, (neighbor, weight) in enumerate(neighbors, 1):
+            bar_length = min(50, int(weight / 5))
+            bar = '█' * bar_length
+            lines.append(f"{i:2d}. [{neighbor}]")
+            lines.append(f"    Edge weight: {weight} {bar}")
+            lines.append("")
+        
+        lines.append(f"{'='*70}\n")
+        return '\n'.join(lines)
+    
+    def export_to_dot(self, output_path, max_edges=100):
+        """
+        Export graph to DOT format for Graphviz visualization
+        
+        Args:
+            output_path: Path to save .dot file
+            max_edges: Limit edges for readability (0 for all)
+            
+        Returns:
+            str: Success message or error
+        """
+        try:
+            # Get top edges by weight for visualization
+            all_edges = []
+            seen = set()
+            
+            for item1 in self.graph:
+                for item2, weight in self.graph[item1].items():
+                    edge = tuple(sorted([item1, item2]))
+                    if edge not in seen:
+                        seen.add(edge)
+                        all_edges.append((edge[0], edge[1], weight))
+            
+            # Sort by weight and limit
+            all_edges.sort(key=lambda x: -x[2])
+            if max_edges > 0:
+                all_edges = all_edges[:max_edges]
+            
+            # Generate DOT format
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write("graph SupermarketGraph {\n")
+                f.write("  graph [rankdir=LR, overlap=false];\n")
+                f.write("  node [shape=box, style=filled, fillcolor=lightblue];\n")
+                f.write("  edge [color=gray];\n\n")
+                
+                # Write edges
+                for item1, item2, weight in all_edges:
+                    # Escape quotes and special chars
+                    item1_clean = item1.replace('"', '\\"')
+                    item2_clean = item2.replace('"', '\\"')
+                    f.write(f'  "{item1_clean}" -- "{item2_clean}" [label="{weight}", penwidth={min(weight/20, 5)}];\n')
+                
+                f.write("}\n")
+            
+            return f"✓ Exported {len(all_edges)} edges to {output_path}"
+        except Exception as e:
+            return f"✗ Export failed: {str(e)}"

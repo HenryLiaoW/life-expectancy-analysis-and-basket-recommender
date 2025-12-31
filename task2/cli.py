@@ -44,7 +44,8 @@ class SupermarketCLI:
         print("4. Co-purchase Frequency Check (Requirement 3)")
         print("5. Basket-based Recommendation (Extension)")
         print("6. Dynamic Update Simulation (Extension)")
-        print("7. System Statistics")
+        print("7. Visualize Graph Structure (Visualization)")
+        print("8. System Statistics")
         print("0. Exit")
         print("-" * 50)
         
@@ -324,6 +325,71 @@ class SupermarketCLI:
         
         for rank, (item, conn_count) in enumerate(item_connections[:5], 1):
             print(f"   {rank}. {item:<30} ({conn_count} connections)")
+    
+    def visualize_graph(self):
+        """
+        Visualization Extension: Display graph structure
+        """
+        if not self._check_data_loaded():
+            return
+        
+        print("\n--- GRAPH VISUALIZATION ---")
+        print("1. ASCII Subgraph (item neighborhood)")
+        print("2. Export to DOT format (Graphviz)")
+        print("0. Back to main menu")
+        
+        choice = input("\nSelect visualization type: ").strip()
+        
+        if choice == '0':
+            return
+        elif choice == '1':
+            # ASCII subgraph visualization
+            item = input("\nEnter item name to visualize: ").strip()
+            if not item:
+                print("❌ Item name cannot be empty")
+                return
+            
+            if not self.engine.graph.has_item(item):
+                print(f"\n⚠️  Item '{item}' not found")
+                self._suggest_similar_items(item)
+                return
+            
+            try:
+                max_neighbors = int(input("Max neighbors to show (default 10): ").strip() or "10")
+                if max_neighbors <= 0:
+                    print("❌ Number must be positive")
+                    return
+            except ValueError:
+                print("❌ Invalid number")
+                return
+            
+            visualization = self.engine.graph.visualize_subgraph(item, max_neighbors)
+            print(visualization)
+            
+        elif choice == '2':
+            # Export to DOT format
+            output_file = input("\nOutput filename (default: graph.dot): ").strip() or "graph.dot"
+            
+            try:
+                max_edges = int(input("Max edges to export (0=all, default 100): ").strip() or "100")
+                if max_edges < 0:
+                    print("❌ Number cannot be negative")
+                    return
+            except ValueError:
+                print("❌ Invalid number")
+                return
+            
+            output_path = Path(__file__).parent / output_file
+            result = self.engine.graph.export_to_dot(str(output_path), max_edges)
+            print(f"\n{result}")
+            
+            if result.startswith("✓"):
+                print(f"\n💡 To visualize:")
+                print(f"   1. Install Graphviz: https://graphviz.org/download/")
+                print(f"   2. Run: dot -Tpng {output_file} -o graph.png")
+                print(f"   3. Or use online viewer: http://www.webgraphviz.com/")
+        else:
+            print("❌ Invalid choice")
             
     def _check_data_loaded(self):
         """
@@ -389,10 +455,13 @@ class SupermarketCLI:
                     self.simulate_dynamic_update()
                     
                 elif choice == '7':
+                    self.visualize_graph()
+                    
+                elif choice == '8':
                     self.show_statistics()
                     
                 else:
-                    print("\n❌ Invalid choice. Please enter 0-7.")
+                    print("\n❌ Invalid choice. Please enter 0-8.")
                     
                 # Pause for user to read output
                 if choice != '0':

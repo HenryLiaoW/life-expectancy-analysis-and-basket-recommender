@@ -110,6 +110,34 @@ class Graph(ABC):
         """
         pass
     
+    @abstractmethod
+    def visualize_subgraph(self, center_item: str, max_neighbors: int = 10) -> str:
+        """
+        Generate ASCII visualization of item's neighborhood.
+        
+        Args:
+            center_item: Central item to visualize
+            max_neighbors: Maximum neighbors to show
+            
+        Returns:
+            ASCII visualization string or error message
+        """
+        pass
+    
+    @abstractmethod
+    def export_to_dot(self, output_path: str, max_edges: int = 100) -> str:
+        """
+        Export graph to DOT format for external visualization.
+        
+        Args:
+            output_path: Path to save .dot file
+            max_edges: Limit edges for readability (0 for all)
+            
+        Returns:
+            Success/error message string
+        """
+        pass
+    
     @property
     @abstractmethod
     def num_edges(self) -> int:
