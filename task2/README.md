@@ -30,14 +30,16 @@ A Python-based recommendation system that analyzes customer purchasing patterns 
 - Co-purchase frequency analysis
 - Basket-based recommendations (extension)
 - Real-time dynamic updates (extension)
+- Graph visualization (ASCII & DOT export)
 
 ## 📊 Implementation Highlights
 
 - **Data Structure**: Adjacency list (dict-based) for efficient graph representation
 - **Algorithm**: Co-occurrence counting with stable sorting (-count, name)
-- **Design Pattern**: Two-layer architecture (Graph + Recommender)
+- **Design Pattern**: Two-layer architecture (Graph + Recommender) with dependency injection
 - **Development Method**: Test-Driven Development (TDD)
-- **Test Coverage**: 41 comprehensive tests (100% pass rate)
+- **Test Coverage**: 44 comprehensive tests (100% pass rate)
+- **Visualization**: Pure Python ASCII art + DOT format export
 
 ## 🚀 Quick Start
 
@@ -148,12 +150,13 @@ task2/
 │   └── Supermarket_dataset_PAI.csv    # Dataset (38,765 records)
 ├── src/
 │   ├── __init__.py
-│   ├── graph_adjacency_list.py         # Graph data structure (137 lines)
-│   └── recommendation_engine.py        # Business logic (133 lines)
+│   ├── graph_interface.py              # Abstract Graph interface (ABC)
+│   ├── graph_adjacency_list.py         # Graph implementation (241 lines)
+│   └── recommendation_engine.py        # Business logic (149 lines)
 ├── tests/
 │   ├── __init__.py
 │   ├── conftest.py                     # Test fixtures
-│   ├── test_main.py                    # ⭐ PRIMARY TEST FILE (50 tests)
+│   ├── test_main.py                    # ⭐ PRIMARY TEST FILE (44 tests)
 │   ├── test_graph_adjacency_list.py    # 19 graph tests
 │   ├── test_recommendation_engine.py   # 21 engine tests
 │   └── test_smoke.py                   # 1 smoke test
@@ -163,7 +166,7 @@ task2/
 │   │   ├── *_RedPhase.py              # Red phase snapshots
 │   │   └── *_CN.py                    # Chinese version backups
 │   └── learning_examples/             # Exploration code
-├── cli.py                              # Command-line interface (350+ lines)
+├── cli.py                              # Command-line interface (420+ lines)
 ├── main.py                             # Main entry point
 └── README.md                           # This file
 ```
@@ -180,7 +183,8 @@ task2/
 4. Co-purchase Frequency Check (Requirement 3)
 5. Basket-based Recommendation (Extension)
 6. Dynamic Update Simulation (Extension)
-7. System Statistics
+7. Visualize Graph Structure (Visualization)
+8. System Statistics
 0. Exit
 ```
 
@@ -254,6 +258,62 @@ Frequently purchased together: ✅ YES
 ======================================================================
 ```
 
+#### 7. Visualize Graph Structure
+
+```
+Enter your choice: 7
+
+--- GRAPH VISUALIZATION ---
+1. ASCII Subgraph (item neighborhood)
+2. Export to DOT format (Graphviz)
+0. Back to main menu
+
+Select visualization type: 1
+
+Enter item name to visualize: whole milk
+Max neighbors to show (default 10): 5
+
+======================================================================
+SUBGRAPH VISUALIZATION: whole milk
+======================================================================
+Center Node: [whole milk]
+Total Neighbors: 155
+Showing Top 5 Neighbors
+----------------------------------------------------------------------
+
+ 1. [other vegetables]
+    Edge weight: 222 ████████████████████████████████████████████
+
+ 2. [rolls/buns]
+    Edge weight: 209 █████████████████████████████████████████
+
+ 3. [soda]
+    Edge weight: 174 ██████████████████████████████████
+
+ 4. [yogurt]
+    Edge weight: 167 █████████████████████████████████
+
+ 5. [sausage]
+    Edge weight: 134 ██████████████████████████
+
+======================================================================
+```
+
+**DOT Export Example**:
+```
+Select visualization type: 2
+
+Output filename (default: graph.dot): top20_edges.dot
+Max edges to export (0=all, default 100): 20
+
+✓ Exported 20 edges to /path/to/task2/top20_edges.dot
+
+💡 To visualize:
+   1. Install Graphviz: https://graphviz.org/download/
+   2. Run: dot -Tpng top20_edges.dot -o graph.png
+   3. Or use online viewer: http://www.webgraphviz.com/
+```
+
 ## 🏗️ Architecture
 
 ### Two-Layer Design
@@ -276,6 +336,8 @@ Frequently purchased together: ✅ YES
 │   - get_neighbors()                 │
 │   - get_top_neighbors()             │
 │   - get_edge_weight()               │
+│   - visualize_subgraph()            │  ← Visualization
+│   - export_to_dot()                 │
 └─────────────────────────────────────┘
 ```
 
