@@ -121,7 +121,10 @@ class SupermarketCLI:
             print(f"\n⚠️  No co-purchase data available for '{item}'")
             return
         
-        print(f"\n✓ Found only {len(recommendations)} items related to '{item}'")
+        # Only show "Found only X items" if fewer items found than requested
+        if len(recommendations) < k:
+            print(f"\n✓ Found only {len(recommendations)} items related to '{item}'")
+        
         print(f"\n📊 Top {len(recommendations)} items frequently bought with '{item}':")
         print("-" * 70)
         print(f"{'Rank':<6} {'Product Name':<40} {'Co-purchase Count':>20}")

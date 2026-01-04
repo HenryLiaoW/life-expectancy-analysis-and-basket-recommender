@@ -58,14 +58,18 @@ class RecommendationEngine:
         Requirement 2: Most frequent co-purchase pairs
         "Which product combinations are most frequently bought together?"
         
+        Uses size-k heap for O(E log k) complexity instead of full sort O(E log E).
+        
         Args:
             top_k: Number to return
             
         Returns:
             list[tuple]: [((item1, item2), count), ...]
         """
-        # Collect all edges
-        pairs = []
+        import heapq
+        
+        # Build heap of all edges - O(E)
+        heap = []
         seen = set()
         
         for item1 in self.graph.get_all_items():
@@ -75,11 +79,14 @@ class RecommendationEngine:
                 pair_key = tuple(sorted([item1, item2]))
                 if pair_key not in seen:
                     seen.add(pair_key)
-                    pairs.append((pair_key, count))
+                    # Negate count for max-heap behavior with min-heap
+                    heapq.heappush(heap, (-count, pair_key))
         
-        # Sort by count descending, then by pair for stability
-        sorted_pairs = sorted(pairs, key=lambda x: (-x[1], x[0]))
-        return sorted_pairs[:top_k]
+        # Extract top-k - O(k log E), total O(E log k) when k << E
+        top_pairs = heapq.nsmallest(top_k, heap)
+        
+        # Convert back: [(-count, pair), ...] -> [(pair, count), ...]
+        return [(pair, -count) for count, pair in top_pairs]
     
     def check_co_purchase(self, item1, item2, threshold=50):
         """

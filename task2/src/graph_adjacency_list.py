@@ -20,7 +20,7 @@ class GraphAdjacencyList(Graph):
     """
     
     def __init__(self):
-        """Initialize empty graph"""
+        """Initialize empty graph(allocate spaces for nodes[O(V)] and edges[O(E)])"""
         self.graph = defaultdict(lambda: defaultdict(int))
         self.items = set()
         self._num_edges = 0
@@ -57,7 +57,7 @@ class GraphAdjacencyList(Graph):
         for basket_items in baskets.values():
             self.add_transaction(basket_items)
     
-    def add_transaction(self, items):
+    def add_transaction(self, items): # the place which stores the edges
         """
         Add a transaction (dynamic update)
         
@@ -68,7 +68,7 @@ class GraphAdjacencyList(Graph):
         unique_items = list(set(items))
         
         # Update item set
-        self.items.update(unique_items)
+        self.items.update(unique_items) # add new items to the set!!!
         
         # Create edges for all pairs
         for i in range(len(unique_items)):
