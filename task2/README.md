@@ -2,7 +2,7 @@
 
 ## 🔗 Git Repository
 
-**Repository Link**: `https://github.com/YOUR_USERNAME/PAI_SuhangLiao` (Private Repository)
+**Repository Link**: `https://github.com/HenryLiaoW/PAI_SuhangLiao` (Private Repository)
 
 **Important**: This repository is configured as **private** with module tutors added as collaborators for assessment purposes.
 
