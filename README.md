@@ -1,13 +1,14 @@
 # PAI Individual Assignment - Suhang Liao
 
 **Module**: WM9QF-15 Programming for Artificial Intelligence  
-**Date**: December 2025
+**Date**: December 2025  
+**Repository**: https://github.com/HenryLiaoW/PAI_SuhangLiao
 
 ---
 
 ## 📁 Project Structure
 
-This repository contains Task 1 of the Programming for Artificial Intelligence individual assignment.
+This repository contains Task 1 and Task 2 of the Programming for Artificial Intelligence individual assignment.
 
 ```
 PAI_SuhangLiao/
@@ -30,6 +31,19 @@ PAI_SuhangLiao/
 │   ├── cleaner.py                  # Data cleaning
 │   └── tests/                      # Test suite (135 tests)
 │
+├── task2/                          # Task 2: Country Connection Network System
+│   ├── README.md                   # ⭐ Complete Task 2 documentation
+│   ├── src/                        # Source code
+│   │   ├── main.py                 # Entry point (interactive menu)
+│   │   ├── recommendation_engine.py # Core graph analysis
+│   │   ├── network_visualizer.py   # Graphviz visualization
+│   │   └── cli.py                  # Command-line interface
+│   ├── tests/                      # Test suite (85 tests)
+│   │   ├── test_main.py            # Edge cases & integration tests
+│   │   └── ...
+│   ├── verify_performance_metrics.py # Performance verification script
+│   └── PERFORMANCE_VERIFICATION.txt  # Timestamped results
+│
 └── pytest.ini                      # Test configuration
 
 ```
@@ -38,46 +52,62 @@ PAI_SuhangLiao/
 
 ## 🚀 Quick Start
 
-### 1. View Complete Documentation
+### Task 1: Life Expectancy Data Analysis
 
-**English**: [task1/docs/README.md](task1/docs/README.md)  
-**中文**: [task1/docs/README_CN.md](task1/docs/README_CN.md)
-
-### 2. Run the System
+**Complete Documentation**: [task1/docs/README.md](task1/docs/README.md) | [中文版](task1/docs/README_CN.md)
 
 ```bash
-# Option 1: Interactive menu (recommended)
+# Run interactive menu (recommended)
 python -m task1.main
 
-# Option 2: Command-line analysis tool
+# Run command-line analysis tool
 python task1/analysis_cli.py --help
+
+# Run tests (135 tests)
+pytest task1/tests/ -v
 ```
 
-### 3. Run Tests
+### Task 2: Country Connection Network
+
+**Complete Documentation**: [task2/README.md](task2/README.md)
 
 ```bash
-# Run all tests
-pytest task1/tests/ -v
+# Run interactive menu (recommended)
+python task2/src/main.py
 
-# Expected: 135 passed in ~1.2s
+# Run CLI with specific query
+python task2/src/cli.py --country "United Kingdom" --top-k 10
+
+# Run tests (85 tests)
+pytest task2/tests/ -v
+
+# Verify performance metrics
+python task2/verify_performance_metrics.py
 ```
 
 ---
 
 ## 📊 Project Highlights
 
-- **158 automated tests** (135 in task1/tests/ + 23 in docs/learning_examples/)
-- **Test-Driven Development (TDD)** with comprehensive Git history
+### Task 1: Life Expectancy Analysis
+- **135 automated tests** with TDD methodology
 - **SOLID principles** applied throughout design
 - **Policy-oriented analysis** focusing on modifiable health factors
 - **3 CLI interfaces** for different user workflows
 - **3,111 WHO records** covering 183 countries (2015-2017)
 
+### Task 2: Country Connection Network
+- **85 automated tests** with edge case coverage
+- **Graph-based recommendation** using Top-K algorithm
+- **Heap optimization**: O(E log k) instead of O(E log E)
+- **4.5× speedup** over baseline implementation
+- **167 countries, 6,260 connections** in network
+
 ---
 
 ## 📚 Key Documentation
 
-All documentation is located in [`task1/docs/`](task1/docs/):
+### Task 1 Documentation ([`task1/docs/`](task1/docs/))
 
 | Document | Description |
 |----------|-------------|
@@ -86,27 +116,33 @@ All documentation is located in [`task1/docs/`](task1/docs/):
 | [REFLECTIVE_REPORT.md](task1/docs/REFLECTIVE_REPORT.md) | Academic reflection on methodological choices |
 | [REQUIREMENTS_ANALYSIS.md](task1/docs/REQUIREMENTS_ANALYSIS.md) | Detailed requirements analysis |
 | [SOLID_PRINCIPLES_ANALYSIS.md](task1/docs/SOLID_PRINCIPLES_ANALYSIS.md) | SOLID principles application |
-| [CLI_ARCHITECTURE.md](task1/docs/CLI_ARCHITECTURE.md) | CLI tools architecture explanation |
-| [ROBUSTNESS_ANALYSIS.md](task1/docs/ROBUSTNESS_ANALYSIS.md) | Code quality validation report |
+
+### Task 2 Documentation ([`task2/`](task2/))
+
+| Document | Description |
+|----------|-------------|
+| [README.md](task2/README.md) | Complete Task 2 documentation with SOLID/FURPS+ analysis |
+| [verify_performance_metrics.py](task2/verify_performance_metrics.py) | Automated performance verification script |
+| [PERFORMANCE_VERIFICATION.txt](task2/PERFORMANCE_VERIFICATION.txt) | Timestamped performance test results |
 
 ---
 
 ## 🎯 Assessment Criteria Addressed
 
-✅ **Functional Requirements**: Data loading, cleaning, analysis, visualization, interactive CLI  
-✅ **Software Quality**: TDD methodology, 158 automated tests, 0 warnings  
-✅ **Design Principles**: SOLID principles with documented evidence  
+✅ **Functional Requirements**: Task 1 (data analysis) + Task 2 (graph-based recommendations)  
+✅ **Software Quality**: TDD methodology, 220+ automated tests (135 + 85)  
+✅ **Design Principles**: SOLID principles with documented evidence in both tasks  
 ✅ **Code Clarity**: Comprehensive docstrings, type hints, clear structure  
-✅ **Version Control**: 65+ Git commits demonstrating TDD workflow  
-✅ **Documentation**: Complete README, reflective report, technical documentation
+✅ **Version Control**: Git repository with test files (test_main.py for both tasks)  
+✅ **Documentation**: Complete READMEs with run commands, edge case testing, performance verification
 
 ---
 
 ## 👤 Author
 
 **Suhang Liao**  
-Student ID: [Your Student ID]  
-Email: [Your Email]
+Student ID: 5697414
+Email: u5697414@live.warwick.ac.uk
 
 ---
 

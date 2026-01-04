@@ -4,7 +4,7 @@
 **Author**: Suhang Liao  
 **Module**: WM9QF-15 Programming for Artificial Intelligence  
 **Date**: December 2025  
-**Repository**: https://github.com/YOUR_USERNAME/PAI_SuhangLiao
+**Repository**: https://github.com/HenryLiaoW/PAI_SuhangLiao
 
 ---
 
