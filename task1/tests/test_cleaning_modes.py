@@ -16,7 +16,7 @@ import shutil
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
-from task1.pipeline_clean_export import export_cleaned_dataset
+from task1.scripts.pipeline_clean_export import export_cleaned_dataset
 from task1.src.database_cleaner import clean_database_full, print_cleaning_report
 from task1.src.create_db import create_db_from_csv
 

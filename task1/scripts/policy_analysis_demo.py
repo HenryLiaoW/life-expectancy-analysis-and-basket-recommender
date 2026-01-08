@@ -240,7 +240,7 @@ def main():
     print("   • SOLID principles application (SRP, OCP, DIP)")
     print("   • Modular design (data layer, analysis layer, presentation layer separation)")
     print("   • Comprehensive test coverage (unit + integration tests)")
-    print("   • Practical CLI interfaces (menu_cli + analysis_cli)")
+    print("   • Practical CLI interfaces (menu_cli + quick_analysis)")
     
     print("\n" + "="*80)
     print("Demonstration complete! System ready for real-world policy analysis.")
