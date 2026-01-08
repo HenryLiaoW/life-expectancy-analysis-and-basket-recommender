@@ -372,7 +372,7 @@ python task1/quick_analysis.py --help
 ### 运行测试
 
 ```bash
-# 运行所有测试（158个）
+# 运行所有测试（167个）
 pytest task1/tests/ -v
 
 # 运行特定测试文件

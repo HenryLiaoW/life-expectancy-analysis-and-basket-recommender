@@ -373,7 +373,7 @@ python task1/quick_analysis.py --help
 ### Running Tests
 
 ```bash
-# Run all tests (158 tests)
+# Run all tests (167 tests)
 pytest task1/tests/ -v
 
 # Run specific test file

@@ -18,9 +18,9 @@ This document demonstrates how the Task 1 implementation applies SOLID principle
 | SOLID Principle | Design Issue Identified | Design Decision / Refactoring | Evidence in Implementation |
 |----------------|------------------------|-------------------------------|---------------------------|
 | **Single Responsibility Principle (SRP)** | Early design risk of combining data loading, cleaning, analysis, and presentation logic within a single procedural workflow. | Responsibilities were separated into dedicated modules: data loading, data cleaning, analysis functions, database persistence, and CLI presentation. | Distinct modules (e.g., `data_loader.py`, `cleaner.py`, `data_filter.py`, `database_loader.py`, `main.py`) each address a single concern and can be modified independently without side effects. |
-| **Open/Closed Principle (OCP)** | Adding new health indicators or analytical functions risked requiring changes to existing code if analysis logic depended on fixed schemas or custom classes. | All analysis functions were designed to operate on a generic pandas DataFrame interface rather than fixed indicator classes. New indicators are added via extensible `numeric_fields` set in `cleaner.py` without modifying cleaning logic. | New indicators can be analyzed by extending DataFrame-based functions without modifying existing analysis or persistence logic. Example: `numeric_fields = {"life_expect", "adult_mortality", ...}` allows adding indicators by set extension. |
+| **Open/Closed Principle (OCP)** | Adding new health indicators or analytical functions risked requiring changes to existing code if analysis logic depended on fixed schemas or custom classes. | All analysis functions were designed to operate on a generic pandas DataFrame interface rather than fixed indicator classes. New indicators are added via extensible `numeric_fields` set in `cleaner.py` without modifying cleaning logic. New filtering functions (e.g., `filter_by_development_status()`) can be added without modifying existing filters. | New indicators can be analyzed by extending DataFrame-based functions without modifying existing analysis or persistence logic. Example: `numeric_fields = {"life_expect", "adult_mortality", ...}` allows adding indicators by set extension. Development status filter added with support for single/multiple selection without changing core filtering architecture. |
 | **Liskov Substitution Principle (LSP)** | Potential risk of inconsistent behavior if alternative data sources were introduced. | All analysis functions assume only DataFrame semantics (column access, filtering, aggregation), ensuring substitutability across different data-loading paths. | Analysis functions operate identically on DataFrames loaded from CSV files or SQLite queries without behavioral changes. |
-| **Interface Segregation Principle (ISP)** | A monolithic analysis interface would force consumers (CLI, tests) to depend on functions they do not require. | Analysis logic was decomposed into 12 small, focused functions: 5 basic filtering functions, 4 policy-oriented analysis functions, and 3 comparison/prioritization functions. | CLI workflows selectively invoke only the required analysis functions, and unit tests target individual functions rather than a large unified interface. Example: `filter_by_country()`, `analyze_water_access_impact()`, `get_policy_intervention_priorities()` are independently usable. |
+| **Interface Segregation Principle (ISP)** | A monolithic analysis interface would force consumers (CLI, tests) to depend on functions they do not require. | Analysis logic was decomposed into 13 small, focused functions: 6 basic filtering functions (including development status), 4 policy-oriented analysis functions, and 3 comparison/prioritization functions. | CLI workflows selectively invoke only the required analysis functions, and unit tests target individual functions rather than a large unified interface. Example: `filter_by_country()`, `filter_by_development_status()`, `analyze_water_access_impact()`, `get_policy_intervention_priorities()` are independently usable. |
 | **Dependency Inversion Principle (DIP)** | Tight coupling between analysis logic and concrete storage mechanisms (CSV files or SQLite) would reduce testability and flexibility. | Analysis functions depend on abstract DataFrame representations rather than concrete database or file I/O implementations. | Analytical logic is fully decoupled from persistence; tests execute analysis functions using in-memory DataFrames without database dependencies. 135 tests run with isolated fixtures, avoiding database overhead. |
 
 ---
@@ -51,8 +51,8 @@ New indicators can be added to the dataset without modifying function signatures
 ---
 
 ### 3. ISP Through Granular Function Design
-Rather than a monolithic `Analyzer` class with 12 methods, the system provides 12 independent functions:
-- **Basic filtering** (5 functions): `filter_by_country`, `filter_by_region`, etc.
+Rather than a monolithic `Analyzer` class with 13 methods, the system provides 13 independent functions:
+- **Basic filtering** (6 functions): `filter_by_country`, `filter_by_region`, `filter_by_development_status`, etc.
 - **Policy analysis** (4 functions): `analyze_water_access_impact`, `analyze_healthcare_spending`, etc.
 - **Prioritization** (3 functions): `compare_modifiable_factors`, `get_policy_intervention_priorities`, etc.
 
@@ -85,6 +85,7 @@ This decoupling enables fast, database-free unit testing (135 tests execute with
 - `test_data_loader.py` (8 tests)
 - `test_cleaner.py` (18 tests)
 - `test_data_filter.py` (89 tests)
+- `test_development_status_filter.py` (32 tests)
 - `test_database_loader.py` (15 tests)
 
 **DIP Validation**: Tests construct in-memory DataFrames directly:

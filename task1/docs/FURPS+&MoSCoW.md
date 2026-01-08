@@ -20,7 +20,8 @@
 | **7** | The system shall execute analytical queries with low latency on the given dataset. | Query execution completes in sub-second response times for 3,111-record dataset operations. | P (Performance) | **Could** |
 | **8** | The system shall allow new analytical indicators to be added without modifying existing analysis logic. | New indicators can be introduced by extending DataFrame-based analysis functions without changes to database or cleaning modules. | S (Supportability) | **Could** |
 | **9** | The system shall support automated testing of analysis, cleaning, and database components. | Unit tests execute independently with deterministic results; database tests run using isolated fixtures. | S (Supportability) | **Must** |
-| **10** | The system shall exclude predictive modelling and causal inference. | No predictive algorithms or forecasting outputs are implemented; all results are descriptive and correlation-based only. | + (Constraints) | **Must** |
+| **10** | The system shall support filtering by economic development status based on World Bank GNI classification. | Users can filter countries by income level (high/upper-middle/lower-middle/low) with single or multiple selection, displaying results ranked by average GNI. | F (Functionality) | **Should** |
+| **11** | The system shall exclude predictive modelling and causal inference. | No predictive algorithms or forecasting outputs are implemented; all results are descriptive and correlation-based only. | + (Constraints) | **Must** |
 
 ---
 
@@ -29,6 +30,6 @@
 | Priority | Count | Key Requirements |
 |----------|-------|------------------|
 | **Must Have** | 5 | Data loading, Data cleaning robustness, Descriptive analysis, Automated testing, Constraint compliance (no predictive modelling) |
-| **Should Have** | 3 | Menu-driven CLI, Database persistence (CRUD), Transaction consistency |
+| **Should Have** | 4 | Menu-driven CLI, Database persistence (CRUD), Transaction consistency, Development status filtering (GNI-based) |
 | **Could Have** | 2 | Query performance optimization, Extensible analysis framework (OCP) |
 | **Won't Have** | - | Predictive modelling, Real-time data streaming, Web interface, Multi-user concurrent access |

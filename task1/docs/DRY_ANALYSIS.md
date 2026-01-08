@@ -75,9 +75,14 @@ def filter_by_country(df: pd.DataFrame, country: str) -> pd.DataFrame:
 def filter_by_region(df: pd.DataFrame, region: str) -> pd.DataFrame:
     """Single implementation reused across regional analyses"""
     return df[df['region'] == region]
+
+def filter_by_development_status(df: pd.DataFrame, status) -> pd.DataFrame:
+    """Single implementation for GNI-based filtering, supports single/multiple selection"""
+    # Reusable logic with World Bank classification thresholds
+    # Prevents duplication of income level filtering across analyses
 ```
 
-Analysis functions compose these primitives rather than re-implementing filtering logic.
+Analysis functions compose these primitives rather than re-implementing filtering logic. The development status filter demonstrates DRY by supporting both single and multiple selections through the same implementation, eliminating the need for separate functions.
 
 ---
 
