@@ -14,6 +14,7 @@ sys.path.insert(0, project_root)
 
 from task1.database_loader import create_database, load_data_to_db
 from task1.data_loader import load_csv
+from task1.cleaner import clean_dataset
 
 
 def create_db_from_csv(csv_path: str, db_path: str, use_demo_data: bool = False):
@@ -49,6 +50,11 @@ def create_db_from_csv(csv_path: str, db_path: str, use_demo_data: bool = False)
         data = load_csv(csv_path)
         print(f"✓ Loaded CSV: {csv_path}")
         print(f"  Records: {len(data)}")
+        
+        # Clean data using cleaner.py
+        print(f"🧹 Cleaning data...")
+        data = clean_dataset(data)
+        print(f"✓ Data cleaned: {len(data)} records")
     
     # Insert data into database
     load_data_to_db(db_path, data)

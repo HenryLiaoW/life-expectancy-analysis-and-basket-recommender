@@ -298,7 +298,11 @@ def run_crud_operations(db_path: str):
 
 
 def run_create_database():
-    """Interactive database creation from CSV."""
+    """Interactive database creation from CSV.
+    
+    Returns:
+        str: Path to created database, or None if cancelled/failed
+    """
     from task1.create_db import create_db_from_csv
     
     print("\n🔄 Database Creation from CSV")
@@ -320,7 +324,7 @@ def run_create_database():
         csv_path = input("Enter CSV file path: ").strip()
         if not os.path.exists(csv_path):
             print(f"\n❌ File not found: {csv_path}")
-            return
+            return None
         db_default = csv_path.replace('.csv', '.db')
         use_demo = False
     elif choice == '3':
@@ -329,7 +333,7 @@ def run_create_database():
         use_demo = True
     else:
         print("\n❌ Invalid choice")
-        return
+        return None
     
     # Ask for database path
     print(f"\n💾 Output Database:")
@@ -344,7 +348,7 @@ def run_create_database():
         confirm = input(f"\n⚠️  Database exists. Overwrite? (yes/no): ").strip().lower()
         if confirm != 'yes':
             print("\n❌ Cancelled")
-            return
+            return None
     
     # Create database
     try:
@@ -356,15 +360,15 @@ def run_create_database():
         print("\n" + "="*60)
         print("✅ Database created successfully!")
         print("="*60)
-        print(f"\n💡 You can now use:")
-        print(f"  python task1/main_cli.py --db {created_db}")
+        print(f"\n� Database path: {created_db}")
+        
+        return created_db
         
     except Exception as e:
         print(f"\n❌ Error: {e}")
         import traceback
         traceback.print_exc()
-    
-    input("\nPress Enter to return to main menu...")
+        return None
 
 
 def main():
@@ -423,6 +427,25 @@ def main():
             elif choice == '2':
                 run_crud_operations(args.db)
                 # Return to main menu after CRUD
+                print_welcome()
+            
+            elif choice == '3':
+                new_db = run_create_database()
+                if new_db:
+                    # Ask if user wants to switch to new database
+                    print("\n" + "="*60)
+                    switch = input("\n🔄 Switch to new database and continue? (yes/no): ").strip().lower()
+                    if switch == 'yes':
+                        args.db = new_db
+                        print(f"\n✅ Switched to: {new_db}")
+                        print("\n💡 You can now use options 1 or 2 with this database")
+                    else:
+                        print(f"\n💡 Database created but not loaded.")
+                        print(f"   Restart with: python task1/main.py --db {new_db}")
+                else:
+                    print("\n⚠️  Database creation cancelled or failed")
+                
+                input("\nPress Enter to return to main menu...")
                 print_welcome()
             
             elif choice == '0':
