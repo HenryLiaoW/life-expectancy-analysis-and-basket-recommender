@@ -36,7 +36,7 @@ def test_pipeline_mode():
     
     # Step 2: Load cleaned CSV to database
     print("\n📋 Step 2: Loading cleaned CSV to database...")
-    pipeline_db = "task1/data/test_pipeline_mode.db"
+    pipeline_db = "task1/data/test_database_mode.db"
     create_db_from_csv(cleaned_csv, pipeline_db, use_demo_data=False)
     
     print("\n✅ Pipeline Mode Test PASSED")
@@ -100,7 +100,6 @@ def cleanup_test_files():
     """Clean up test files."""
     test_files = [
         "task1/data/test_cleaned_via_pipeline.csv",
-        "task1/data/test_pipeline_mode.db",
         "task1/data/test_database_mode.db"
     ]
     

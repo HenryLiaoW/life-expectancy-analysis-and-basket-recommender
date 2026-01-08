@@ -37,8 +37,8 @@ def create_database(db_path: str) -> None:
     db_dir = os.path.dirname(db_path)
     if db_dir and not os.path.exists(db_dir):
         os.makedirs(db_dir, exist_ok=True)
-    # if语句中db_dir是在确保os取到了目录的名称，防止db_path直接是文件名没有目录时报错
-    # if语句中not后的os语句是为了确保目录存在，如果不存在就创建
+    # Check db_dir exists to handle cases where db_path is just a filename without directory
+    # Create directory if it doesn't exist
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
@@ -181,16 +181,16 @@ def load_data_to_db(db_path: str, data: List[Dict[str, Any]]) -> None:
             
             # Extract column names from the first record
             columns = list(data[0].keys())
-            # 自动获取：['country', 'country_code', 'region', ..., 'une_school']
+            # Auto-extract: ['country', 'country_code', 'region', ..., 'une_school']
 
             # Properly quote column names that contain special characters
             quoted_columns = [f'"{col}"' if '-' in col else col for col in columns]
             placeholders = ", ".join(["?"] * len(columns)) #“?, ?, ?, ?, ?”
-            # 生成：'?, ?, ?, ?, ?, ?, ?, ..., ?' (32个问号)
+            # Generate: '?, ?, ?, ?, ?, ?, ?, ..., ?' (32 placeholders)
 
             
             column_names = ", ".join(quoted_columns) 
-            # 生成：'country, country_code, region, year, ...'
+            # Generate: 'country, country_code, region, year, ...'
 
             # Use INSERT OR REPLACE to handle duplicates gracefully
             insert_sql = f"INSERT OR REPLACE INTO life_expectancy ({column_names}) VALUES ({placeholders})"

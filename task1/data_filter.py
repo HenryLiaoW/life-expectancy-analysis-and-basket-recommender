@@ -184,8 +184,8 @@ def get_country_trend(db_path: str, country: str, metric: str) -> pd.DataFrame:
     # Return empty DataFrame if country not found (don't raise)
     if country_df.empty: 
         return pd.DataFrame(columns=["year", metric])
-        # 之前是 raise ValueError(f"Country '{country}' not found in database")
-        # 改为返回空的DataFrame，方便调用方处理无数据情况。且不会中断程序执行。
+        # Previously: raise ValueError(f"Country '{country}' not found in database")
+        # Changed to return empty DataFrame, easier for caller to handle missing data without interruption
     result = country_df[["year", metric]].sort_values("year")
     return result.reset_index(drop=True)
 

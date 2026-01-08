@@ -260,16 +260,41 @@ def cmd_clear_filters(session: AnalysisSession):
 
 
 def cmd_preview_data(session: AnalysisSession):
-    """Preview dataset."""
+    """Preview dataset with grouped column display."""
     print("\n" + "="*50)
     print("DATASET PREVIEW")
     print("="*50)
     
     data = session.get_current_data()
-    print(f"\nShowing first 10 of {len(data)} records:\n")
-    print(data.head(10).to_string())
+    print(f"\nShowing first 10 of {len(data)} records\n")
     
-    input("\n\nPress Enter to continue...")
+    # Define column groups for better readability
+    # Note: 'country' is added to all groups except Basic Info for easy identification
+    column_groups = {
+        "📍 Basic Info": ["country", "country_code", "region", "year"],
+        "❤️ Life Expectancy": ["country", "year", "life_expect", "life_exp60", "adult_mortality", "infant_mort", "age1-4mort"],
+        "🏥 Health Indicators": ["country", "year", "alcohol", "bmi", "age5-19thinness", "age5-19obesity", "hepatitis", "measles"],
+        "💉 Vaccination": ["country", "year", "polio", "diphtheria"],
+        "🏗️ Infrastructure": ["country", "year", "basic_water", "doctors", "hospitals"],
+        "💰 Economic": ["country", "year", "gni_capita", "gghe-d", "che_gdp"],
+        "🌍 UNESCO Data": ["country", "year", "une_pop", "une_infant", "une_life", "une_hiv", "une_gni", 
+                          "une_poverty", "une_edu_spend", "une_literacy", "une_school"]
+    }
+    
+    preview_data = data.head(10)
+    
+    # Display each group separately
+    for group_name, columns in column_groups.items():
+        # Filter columns that exist in the dataset
+        existing_cols = [col for col in columns if col in preview_data.columns]
+        
+        if existing_cols:
+            print(f"\n{group_name}")
+            print("-" * 50)
+            group_df = preview_data[existing_cols]
+            print(group_df.to_string(index=False))
+    
+    input("\n\n📌 Press Enter to continue...")
 
 
 def cmd_handle_missing(session: AnalysisSession):

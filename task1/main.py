@@ -14,6 +14,11 @@ Module: Programming for Artificial Intelligence WM9QF-15
 import sys
 import os
 
+# Add project root to path for imports
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 
 def print_welcome():
     """Print welcome banner."""
@@ -366,13 +371,17 @@ def main():
     """Main entry point."""
     import argparse
     
+    # Get script directory to build absolute path
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    default_db = os.path.join(script_dir, "data", "CLI_demo.db")
+    
     parser = argparse.ArgumentParser(
         description="Life Expectancy Data Insights System - Main Entry Point"
     )
     parser.add_argument(
         "--db", 
-        default="task1/data/CLI_demo.db",
-        help="Path to SQLite database (default: task1/data/CLI_demo.db)"
+        default=default_db,
+        help=f"Path to SQLite database (default: {default_db})"
     )
     
     args = parser.parse_args()
@@ -381,11 +390,20 @@ def main():
     if not os.path.exists(args.db):
         print(f"\n❌ Error: Database not found at {args.db}")
         print(f"💡 Available databases:")
-        for db in ["CLI_demo.db", "life_expectancy.db"]:
-            path = f"task1/data/{db}"
-            if os.path.exists(path):
-                size = os.path.getsize(path)
-                print(f"   • {path} ({size:,} bytes)")
+        
+        # Search in multiple locations
+        search_paths = [
+            os.path.join(script_dir, "data"),  # task1/data/
+            os.path.join(project_root, "task1", "data")  # From project root
+        ]
+        
+        for search_dir in search_paths:
+            if os.path.exists(search_dir):
+                for db in os.listdir(search_dir):
+                    if db.endswith('.db'):
+                        full_path = os.path.join(search_dir, db)
+                        size = os.path.getsize(full_path)
+                        print(f"   • {full_path} ({size:,} bytes)")
         sys.exit(1)
     
     print_welcome()
