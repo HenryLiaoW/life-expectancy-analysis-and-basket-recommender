@@ -4,7 +4,7 @@
 **作者**: Suhang Liao  
 **课程**: WM9QF-15 人工智能编程  
 **日期**: 2025年12月  
-**代码仓库**: https://github.com/YOUR_USERNAME/PAI_SuhangLiao
+**代码仓库**: https://github.com/HenryLiaoW/PAI_SuhangLiao
 
 ---
 
@@ -187,7 +187,25 @@ pytest task1/tests/ -v
 # 预期输出：158个测试通过
 ```
 
-### 步骤4：初始化数据库
+### 步骤4：验证数据库文件
+
+**✅ 数据库已包含在仓库中，可以直接使用！**
+
+```bash
+# 检查现有数据库
+ls -lh task1/data/*.db
+
+# 预期文件：
+# - life_expectancy.db (664K) - 完整数据集（3111条记录）
+# - CLI_demo.db (28K) - 演示数据集（13条记录）
+```
+
+**注意：** 可以直接跳到[如何运行](#-如何运行)章节。只有以下情况才需要创建数据库：
+- 文件缺失或损坏
+- 想从更新的CSV数据重建
+
+<details>
+<summary>🔧 重建数据库（可选）</summary>
 
 ```bash
 # 方案A：从CSV创建完整数据库（3111条记录）
@@ -200,24 +218,70 @@ python -m task1.create_db --demo
 ls -lh task1/data/*.db
 ```
 
+</details>
+
 ---
 
 ## 🎯 如何运行
 
-### 主CLI界面（推荐）
+### 快速开始（推荐）
+
+**方式A：交互式菜单（13条演示数据）**
+
+```bash
+# 启动主CLI - 默认使用 CLI_demo.db
+python task1/main.py
+
+# 菜单出现后 - 选择选项1进行数据分析
+# 无需先选择选项3 - 数据库已经存在！
+```
+
+**方式B：完整政策分析（3111条真实数据）**
+
+```bash
+# 运行完整数据集的综合演示
+python task1/policy_analysis_demo.py
+
+# 演示内容包括：
+# - 非洲区域分析（799条记录，47个国家）
+# - 印度国家级具体建议
+# - 12个分析函数实战应用
+```
+
+**方式C：命令行分析工具**
+
+```bash
+# 无需交互式菜单的直接查询
+python task1/analysis_cli.py info
+python task1/analysis_cli.py filter --country China
+python task1/analysis_cli.py policy --country India --target 75
+```
+
+---
+
+### 主CLI界面（详细说明）
 
 统一界面，菜单驱动导航：
 
 ```bash
-# 启动主CLI
-python -m task1.main_cli
+# 启动主CLI（使用演示数据库）
+python task1/main.py
 
-# 或使用可执行脚本
-python task1/main_cli.py
+# 或指定完整数据库
+python task1/main.py --db task1/data/life_expectancy.db
 ```
 
 **菜单选项：**
-1. **数据分析管道** - 过滤、清洗、分析、可视化
+1. **数据分析管道** ⭐ - 过滤、清洗、分析、可视化（从这里开始！）
+2. **数据库CRUD操作** - 创建、读取、更新、删除记录
+3. **从CSV创建数据库** - 初始化或重建数据库（很少需要）
+0. **退出** - 关闭应用
+
+**典型工作流程：**
+1. 选择选项 **1**（数据分析）
+2. 使用过滤器（2.1-2.3）选择数据
+3. 对过滤后的数据运行分析（4.1-4.3）
+4. 导出或可视化结果（5.1-5.3）
 2. **数据库CRUD操作** - 创建、读取、更新、删除记录
 3. **从CSV创建数据库** - 初始化或重建数据库
 0. **退出** - 关闭应用

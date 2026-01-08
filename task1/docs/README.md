@@ -186,7 +186,25 @@ pytest task1/tests/ -v
 # Expected output: 158 tests passed
 ```
 
-### Step 4: Initialize Database
+### Step 4: Verify Database Files
+
+**✅ Databases are already included in the repository and ready to use!**
+
+```bash
+# Check existing databases
+ls -lh task1/data/*.db
+
+# Expected files:
+# - life_expectancy.db (664K) - Full dataset (3111 records)
+# - CLI_demo.db (28K) - Demo dataset (13 records)
+```
+
+**Note:** You can skip to [How to Run](#-how-to-run) immediately. Database creation is only needed if:
+- Files are missing or corrupted
+- You want to rebuild from updated CSV data
+
+<details>
+<summary>🔧 Rebuild Database (Optional)</summary>
 
 ```bash
 # Option A: Create full database from CSV (3111 records)
@@ -199,27 +217,70 @@ python -m task1.create_db --demo
 ls -lh task1/data/*.db
 ```
 
+</details>
+
 ---
 
 ## 🎯 How to Run
 
-### Main CLI Interface (Recommended)
+### Quick Start (Recommended)
+
+**Option A: Interactive Menu (13 demo records)**
+
+```bash
+# Launch main CLI - uses CLI_demo.db by default
+python task1/main.py
+
+# Menu appears - select option 1 for data analysis
+# No need to select option 3 first - database already exists!
+```
+
+**Option B: Complete Policy Analysis (3111 real records)**
+
+```bash
+# Run comprehensive demonstration with full dataset
+python task1/policy_analysis_demo.py
+
+# This demonstrates:
+# - Africa regional analysis (799 records, 47 countries)
+# - India country-specific recommendations
+# - All 12 analysis functions in action
+```
+
+**Option C: Command-line Analysis Tool**
+
+```bash
+# Direct queries without interactive menu
+python task1/analysis_cli.py info
+python task1/analysis_cli.py filter --country China
+python task1/analysis_cli.py policy --country India --target 75
+```
+
+---
+
+### Main CLI Interface (Detailed)
 
 The unified interface with menu-driven navigation:
 
 ```bash
-# Launch main CLI
-python -m task1.main
-
-# Or use the executable script
+# Launch main CLI (uses demo database)
 python task1/main.py
+
+# Or specify full database
+python task1/main.py --db task1/data/life_expectancy.db
 ```
 
 **Menu Options:**
-1. **Data Analysis Pipeline** - Filter, clean, analyze, visualize
+1. **Data Analysis Pipeline** ⭐ - Filter, clean, analyze, visualize (start here!)
 2. **Database CRUD Operations** - Create, read, update, delete records
-3. **Create Database from CSV** - Initialize or rebuild database
+3. **Create Database from CSV** - Initialize or rebuild database (rarely needed)
 0. **Exit** - Close application
+
+**Typical Workflow:**
+1. Select option **1** (Data Analysis)
+2. Use filters (2.1-2.3) to select data
+3. Run analysis (4.1-4.3) on filtered data
+4. Export or visualize results (5.1-5.3)
 
 ### Analysis CLI Tool (Data Analysis & Policy Queries)
 
