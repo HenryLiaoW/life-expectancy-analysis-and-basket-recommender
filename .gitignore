@@ -15,4 +15,12 @@ venv/
 .DS_Store
 *.db
 
+# Output and logs
+task1/logs/
+task1/output/*.csv
+task2/*.dot
+
+# Test/pipeline data
+task1/data/*_cleaned_via_pipeline.csv
+
 
