@@ -18,7 +18,6 @@
 6. [模块文档](#-模块文档)
 7. [测试策略](#-测试策略)
 8. [设计原则](#-设计原则-solid)
-9. [参考文献](#-参考文献)
 
 ---
 
@@ -134,13 +133,14 @@ PAI_SuhangLiao/
 │   │
 │   ├── create_db.py                # 数据库初始化工具
 │   │
-│   ├── tests/                      # ⭐ TDD测试套件（158个测试）
-│   │   ├── conftest.py             # 共享fixtures
-│   │   ├── test_main.py            # ⭐ 主CLI测试（23个）
+│   ├── tests/                      # ⭐ TDD 测试套件（167个）
+│   │   ├── conftest.py             # 共享 fixture
+│   │   ├── test_main.py            # ⭐ 主 CLI 测试（23个）
 │   │   ├── test_cleaner.py         # 数据清洗测试（7个）
 │   │   ├── test_data_loader.py     # CSV加载测试（2个）
 │   │   ├── test_database_loader.py # 数据库CRUD测试（34个）
 │   │   ├── test_data_filter.py     # 分析函数测试（46个）
+│   │   ├── test_development_status_filter.py # 发展状态筛选（32个）
 │   │   ├── test_analysis_correlation.py # 相关性测试（18个）
 │   │   ├── test_logger.py          # 日志测试（1个）
 │   │   ├── test_cleaning_modes.py  # 双模式清洗测试（2个）
@@ -155,16 +155,13 @@ PAI_SuhangLiao/
 │   └── logs/                       # 活动日志（自动生成）
 │
 ├── docs/                           # 项目文档
-│   ├── PROJECT_COMPLIANCE_REPORT.md    # 自我评估
-│   ├── DATA_FILTER_ARCHITECTURE.md     # 设计文档
-│   ├── DATA_FILTER_QUICK_REFERENCE.md  # API快速参考
-│   ├── FURPS_ANALYSIS.md               # 质量分析
-│   └── learning_examples/              # 开发示例
+│   ├── README.md                       # ⭐ 详细指南（英文）
+│   ├── README_CN.md                    # ⭐ 本文件（中文版）
+│   ├── FURPS+&MoSCoW.md                # 需求分析（FURPS+ 方法论）
+│   ├── SOLID.md                        # SOLID 原则分析
+│   └── DRY_ANALYSIS.md                 # DRY 原则分析
 │
-├── SOLID_PRINCIPLES_ANALYSIS.md    # ⭐ 设计原则分析
-├── FURPS_ANALYSIS.md               # 质量属性分析
-├── README.md                       # 英文版README
-├── README_CN.md                    # ⭐ 本文件（中文版）
+├── README.md                       # 项目概览
 ├── pytest.ini                      # 测试配置
 └── .gitignore                      # 版本控制排除项
 ```
@@ -181,7 +178,7 @@ PAI_SuhangLiao/
 ### 步骤1：克隆仓库
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/PAI_SuhangLiao.git
+git clone https://github.com/HenryLiaoW/PAI_SuhangLiao.git
 cd PAI_SuhangLiao
 ```
 
@@ -754,58 +751,15 @@ def filter_by_country(df: pd.DataFrame, country: str) -> pd.DataFrame:
 
 ---
 
-## 📖 参考文献
-
-### 学术参考
-
-1. **测试驱动开发**：
-   - Beck, K. (2003). *Test-Driven Development: By Example*. Addison-Wesley Professional.
-   - Martin, R. C. (2008). *Clean Code: A Handbook of Agile Software Craftsmanship*. Prentice Hall.
-
-2. **SOLID原则**：
-   - Martin, R. C. (2000). "Design Principles and Design Patterns". *Object Mentor*, 1(34), 597.
-   - Gamma, E., Helm, R., Johnson, R., & Vlissides, J. (1994). *Design Patterns: Elements of Reusable Object-Oriented Software*. Addison-Wesley.
-
-3. **软件质量（FURPS）**：
-   - Grady, R. B. (1992). *Practical Software Metrics for Project Management and Process Improvement*. Prentice Hall.
-
-4. **数据分析**：
-   - McKinney, W. (2017). *Python for Data Analysis: Data Wrangling with Pandas, NumPy, and IPython* (第2版). O'Reilly Media.
-
-5. **数据库设计**：
-   - Date, C. J. (2004). *An Introduction to Database Systems* (第8版). Pearson.
-
-### 数据源
-
-- 世界卫生组织（WHO）。(2015-2017). *预期寿命和健康因素数据*。全球卫生观察站。
-
-### Python库
-
-- pandas 2.0+：数据操作（McKinney, 2017）
-- pytest 7.0+：测试框架
-- matplotlib 3.7+：数据可视化
-- SQLite3：嵌入式数据库
-
-### 开发方法论
-
-本项目遵循作业要求的**测试驱动开发（TDD）**方法论：
-1. 先编写失败的测试（RED阶段）
-2. 实现最少的代码以通过测试（GREEN阶段）
-3. 重构以提高质量（REFACTOR阶段）
-
-Git提交历史提供了这一工作流程的完整证明（参见TDD证明章节）。
-
----
-
 ## 🎓 学习成果
 
 ### 展示的技能
 
 ✅ **软件工程**：
-- 测试驱动开发（158个测试）
+- 测试驱动开发（167个测试）
 - Python中的SOLID原则
 - Git版本控制，提交消息规范
-- 模块化架构（8个核心模块）
+- 模块化架构（10个核心模块）
 
 ✅ **数据工程**：
 - CSV解析和清洗
@@ -830,14 +784,13 @@ Git提交历史提供了这一工作流程的完整证明（参见TDD证明章�
 ## 📝 作业合规性检查清单
 
 ✅ **TDD方法论**：Git历史显示RED → GREEN → REFACTOR循环  
-✅ **测试覆盖率**：所有模块的158个自动化测试  
+✅ **测试覆盖率**：所有模块的167个自动化测试  
 ✅ **Git仓库**：带有适当提交历史的私有仓库  
 ✅ **带命令的README**：全面的设置和运行说明  
 ✅ **边界情况测试**：空输入、无效类型、边界条件  
 ✅ **代码质量**：注释、文档字符串、类型提示贯穿始终  
-✅ **学术参考**：5个引用（Beck、Martin、Gamma等、Grady、McKinney）  
-✅ **SOLID原则**：记录在SOLID_PRINCIPLES_ANALYSIS.md中  
-✅ **模块化设计**：8个具有明确职责的独立模块
+✅ **SOLID原则**：记录在SOLID.md中  
+✅ **模块化设计**：10个具有明确职责的独立模块
 
 ---
 
@@ -849,4 +802,4 @@ Git提交历史提供了这一工作流程的完整证明（参见TDD证明章�
 
 ---
 
-*最后更新：2025年12月*
+*最后更新：2026年1月*

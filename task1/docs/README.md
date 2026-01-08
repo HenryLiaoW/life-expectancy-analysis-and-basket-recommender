@@ -18,7 +18,6 @@
 6. [Module Documentation](#-module-documentation)
 7. [Testing Strategy](#-testing-strategy)
 8. [Design Principles](#-design-principles-solid)
-9. [References](#-references)
 
 ---
 
@@ -136,13 +135,14 @@ PAI_SuhangLiao/
 │   │
 │   ├── create_db.py                # Database initialization utility
 │   │
-│   ├── tests/                      # ⭐ TDD test suite (158 tests)
+│   ├── tests/                      # ⭐ TDD test suite (167 tests)
 │   │   ├── conftest.py             # Shared fixtures
 │   │   ├── test_main.py            # ⭐ Main CLI tests (23 tests)
 │   │   ├── test_cleaner.py         # Data cleaning tests (7 tests)
 │   │   ├── test_data_loader.py     # CSV loading tests (2 tests)
 │   │   ├── test_database_loader.py # Database CRUD tests (34 tests)
 │   │   ├── test_data_filter.py     # Analysis functions tests (46 tests)
+│   │   ├── test_development_status_filter.py # Development status filter (32 tests)
 │   │   ├── test_analysis_correlation.py # Correlation tests (18 tests)
 │   │   ├── test_logger.py          # Logging tests (1 test)
 │   │   ├── test_cleaning_modes.py  # Dual-mode cleaning tests (2 tests)
@@ -157,15 +157,13 @@ PAI_SuhangLiao/
 │   └── logs/                       # Activity logs (auto-generated)
 │
 ├── docs/                           # Project documentation
-│   ├── PROJECT_COMPLIANCE_REPORT.md    # Self-assessment
-│   ├── DATA_FILTER_ARCHITECTURE.md     # Design documentation
-│   ├── DATA_FILTER_QUICK_REFERENCE.md  # API quick reference
-│   ├── FURPS_ANALYSIS.md               # Quality analysis
-│   └── learning_examples/              # Development examples
+│   ├── README.md                       # ⭐ This file (detailed guide)
+│   ├── README_CN.md                    # Chinese version
+│   ├── FURPS+&MoSCoW.md                # Requirements analysis (FURPS+ methodology)
+│   ├── SOLID.md                        # SOLID principles analysis
+│   └── DRY_ANALYSIS.md                 # DRY principle analysis
 │
-├── SOLID_PRINCIPLES_ANALYSIS.md    # ⭐ Design principles analysis
-├── FURPS_ANALYSIS.md               # Quality attributes analysis
-├── README.md                       # ⭐ This file
+├── README.md                       # Project overview
 ├── pytest.ini                      # Test configuration
 └── .gitignore                      # Version control exclusions
 ```
@@ -182,7 +180,7 @@ PAI_SuhangLiao/
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/PAI_SuhangLiao.git
+git clone https://github.com/HenryLiaoW/PAI_SuhangLiao.git
 cd PAI_SuhangLiao
 ```
 
@@ -939,58 +937,15 @@ High-level modules don't depend on low-level details:
 
 ---
 
-## 📖 References
-
-### Academic References
-
-1. **Test-Driven Development**:
-   - Beck, K. (2003). *Test-Driven Development: By Example*. Addison-Wesley Professional.
-   - Martin, R. C. (2008). *Clean Code: A Handbook of Agile Software Craftsmanship*. Prentice Hall.
-
-2. **SOLID Principles**:
-   - Martin, R. C. (2000). "Design Principles and Design Patterns". *Object Mentor*, 1(34), 597.
-   - Gamma, E., Helm, R., Johnson, R., & Vlissides, J. (1994). *Design Patterns: Elements of Reusable Object-Oriented Software*. Addison-Wesley.
-
-3. **Software Quality (FURPS)**:
-   - Grady, R. B. (1992). *Practical Software Metrics for Project Management and Process Improvement*. Prentice Hall.
-
-4. **Data Analysis**:
-   - McKinney, W. (2017). *Python for Data Analysis: Data Wrangling with Pandas, NumPy, and IPython* (2nd ed.). O'Reilly Media.
-
-5. **Database Design**:
-   - Date, C. J. (2004). *An Introduction to Database Systems* (8th ed.). Pearson.
-
-### Data Source
-
-- World Health Organization (WHO). (2015-2017). *Life Expectancy and Health Factors Data*. Global Health Observatory.
-
-### Python Libraries
-
-- pandas 2.0+: Data manipulation (McKinney, 2017)
-- pytest 7.0+: Testing framework
-- matplotlib 3.7+: Data visualization
-- SQLite3: Embedded database
-
-### Development Methodology
-
-This project follows **Test-Driven Development (TDD)** methodology as required by the assignment:
-1. Write failing tests first (RED phase)
-2. Implement minimum code to pass (GREEN phase)
-3. Refactor for quality (REFACTOR phase)
-
-Git commit history provides complete evidence of this workflow (see section on TDD Evidence).
-
----
-
 ## 🎓 Learning Outcomes
 
 ### Skills Demonstrated
 
 ✅ **Software Engineering**:
-- Test-Driven Development (158 tests)
+- Test-Driven Development (167 tests)
 - SOLID principles in Python
 - Git version control with proper commit messages
-- Modular architecture (8 core modules)
+- Modular architecture (10 core modules)
 
 ✅ **Data Engineering**:
 - CSV parsing and cleaning
@@ -1014,7 +969,7 @@ Git commit history provides complete evidence of this workflow (see section on T
 
 ## 📞 Contact & Support
 
-**Repository Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/PAI_SuhangLiao/issues)  
+**Repository Issues**: [GitHub Issues](https://github.com/HenryLiaoW/PAI_SuhangLiao/issues)  
 **Documentation**: See `docs/` folder for detailed guides
 
 ---
@@ -1022,14 +977,13 @@ Git commit history provides complete evidence of this workflow (see section on T
 ## 📝 Assignment Compliance Checklist
 
 ✅ **TDD Methodology**: Git history shows RED → GREEN → REFACTOR cycles  
-✅ **Test Coverage**: 151 automated tests across all modules  
+✅ **Test Coverage**: 167 automated tests across all modules  
 ✅ **Git Repository**: Private repository with proper commit history  
 ✅ **README with Commands**: Comprehensive setup and run instructions  
 ✅ **Edge Case Testing**: Empty inputs, invalid types, boundary conditions  
 ✅ **Code Quality**: Comments, docstrings, type hints throughout  
-✅ **Academic References**: 5 citations (Beck, Martin, Gamma et al., Grady, McKinney)  
-✅ **SOLID Principles**: Documented in SOLID_PRINCIPLES_ANALYSIS.md  
-✅ **Modular Design**: 8 independent modules with clear responsibilities
+✅ **SOLID Principles**: Documented in SOLID.md  
+✅ **Modular Design**: 10 independent modules with clear responsibilities
 
 ---
 
@@ -1041,4 +995,4 @@ This project is submitted as part of the WM9QF-15 Programming for Artificial Int
 
 ---
 
-*Last Updated: December 2025*
+*Last Updated: January 2026*
