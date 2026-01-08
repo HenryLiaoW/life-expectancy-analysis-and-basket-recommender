@@ -46,16 +46,26 @@ A comprehensive data analysis system for WHO life expectancy data (2015-2017, 18
 
 ✅ **Advanced Data Filtering**  
 - 12 analysis functions in `data_filter.py`
+- Multi-country selection support (comma-separated input)
 - Policy-oriented insights (water access, healthcare spending, vaccination)
 - Statistical summaries and trend analysis
 
 ✅ **Interactive CLI Interfaces**  
 - `main.py`: Unified menu-driven system with session management
+- `menu_cli.py`: Enhanced with multi-country filtering, smart defaults, CSV exports
 - `analysis_cli.py`: Command-line tool for data analysis and policy queries
 
 ✅ **Data Visualization**  
+- Dynamic chart sizing based on data volume
+- Error bars showing min-max ranges for stability analysis
 - Trend charts and comparative tables
 - Export capabilities (PNG, CSV)
+
+✅ **Advanced Analysis Features** ⭐ NEW
+- Top improving countries analysis (4.6)
+- Country comparison with smart defaults (top5, random5)
+- Statistical summary with CSV export
+- Summary tables with CSV export
 
 ✅ **Activity Logging**  
 - Complete audit trail of user operations
@@ -71,13 +81,18 @@ A comprehensive data analysis system for WHO life expectancy data (2015-2017, 18
 │              (Main Entry Point - 434 lines)                 │
 │         - Welcome screen and main menu                      │
 │         - Routes to analysis or CRUD operations             │
-│         - ⭐ 158 tests in tests/ directory                 │
+│         - ⭐ 158+ tests in tests/ directory                │
 └─────────────────┬───────────────────┬───────────────────────┘
                   │                   │
        ┌──────────▼──────────┐    ┌──▼──────────────────┐
        │    menu_cli.py      │    │  analysis_cli.py    │
-       │   (723 lines)       │    │   (393 lines)       │
+       │   (1100+ lines)     │    │   (393 lines)       │
        │  Interactive Menu   │    │  Command-line Tool  │
+       │  - Multi-country    │    │  - Quick queries    │
+       │  - Smart defaults   │    │  - Policy analysis  │
+       │  - CSV exports      │    │  - Batch filtering  │
+       └─────────┬───────────┘    └──┬──────────────────┘
+                 │                    │
        └──────────┬──────────┘    └──┬──────────────────┘
                   │                   │
         ┌─────────┴─────────┬─────────┴─────────┬─────────────┐
@@ -276,11 +291,52 @@ python task1/main.py --db task1/data/life_expectancy.db
 3. **Create Database from CSV** - Initialize or rebuild database (rarely needed)
 0. **Exit** - Close application
 
-**Typical Workflow:**
-1. Select option **1** (Data Analysis)
-2. Use filters (2.1-2.3) to select data
-3. Run analysis (4.1-4.3) on filtered data
-4. Export or visualize results (5.1-5.3)
+**Data Analysis Pipeline Menu Structure:**
+
+**1. DATA ACCESS** - Database information and management
+- 1.1: View database info
+
+**2. DATA FILTERING** - Query and selection
+- 2.1: Filter by country (supports multiple: "China, India, USA")
+- 2.2: Filter by region
+- 2.3: Filter by year range
+- 2.4: Clear all filters
+- 2.5: Preview current dataset
+- 2.6: Export filtered data to CSV ⭐
+
+**3. DATA CLEANING** - Quality control
+- 3.1: Create cleaned database from CSV (Pipeline Mode)
+- 3.2: Clean existing database (SQL Mode)
+
+**4. DATA SUMMARIZATION** - Analysis and visualization
+- 4.1: Correlation analysis
+- 4.2: Country comparison (with error bars showing min-max ranges)
+- 4.3: Statistical summary (with CSV export option)
+- 4.4: Visualize trends (matplotlib line charts)
+- 4.5: Generate summary table (with CSV export option)
+- 4.6: Top improving countries analysis ⭐ NEW
+
+**Typical Workflows:**
+
+**Workflow 1: Filter & Export**
+1. Select **2.1** → Enter countries: "China, India, Japan"
+2. Select **2.6** → Export filtered data to CSV
+
+**Workflow 2: Regional Analysis**
+1. Select **2.2** → Choose region: "Africa"
+2. Select **4.6** → Analyze top 5 improving countries
+3. Input k=5, generate trend chart and export summary
+
+**Workflow 3: Country Comparison**
+1. Select **2.4** → Clear filters (global analysis)
+2. Select **4.2** → Compare countries with "top5" option
+3. View bar chart with error bars showing stability
+
+**Workflow 4: Top Improving Countries** ⭐ NEW
+1. Select **2.2** → Filter region: "Africa" (optional)
+2. Select **4.6** → Find fastest improving countries
+3. Input k=5 → View top 5 with improvement stats
+4. Generate trend chart and export CSV summary
 
 ### Analysis CLI Tool (Data Analysis & Policy Queries)
 
