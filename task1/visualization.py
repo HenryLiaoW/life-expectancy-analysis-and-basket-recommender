@@ -70,8 +70,22 @@ def generate_life_expectancy_trend_chart(
     if missing:
         raise ValueError(f"Missing required columns: {missing}")
     
+    # Count unique countries to adjust figure size
+    num_countries = data['country'].nunique()
+    
+    # Dynamic figure sizing based on number of countries
+    if num_countries <= 5:
+        figsize = (12, 7)
+    elif num_countries <= 10:
+        figsize = (14, 8)
+    elif num_countries <= 20:
+        figsize = (16, 10)
+    else:
+        # For many countries, increase height significantly
+        figsize = (18, 12)
+    
     # Create figure with professional dimensions
-    fig, ax = plt.subplots(figsize=(12, 7))
+    fig, ax = plt.subplots(figsize=figsize)
     
     # Plot each country as a separate line
     for country in data['country'].unique():
@@ -95,14 +109,23 @@ def generate_life_expectancy_trend_chart(
     ax.set_xlabel('Year', fontsize=13, fontweight='bold')
     ax.set_ylabel('Life Expectancy (years)', fontsize=13, fontweight='bold')
     ax.set_title(
-        'Life Expectancy Trends Over Time',
+        f'Life Expectancy Trends Over Time ({num_countries} countries)',
         fontsize=15,
         fontweight='bold',
         pad=20
     )
     
-    # Legend placement - auto-position
-    ax.legend(loc='best', fontsize=10, framealpha=0.9)
+    # Legend placement - adaptive based on number of countries
+    if num_countries <= 10:
+        # Few countries - legend inside plot area
+        ax.legend(loc='best', fontsize=10, framealpha=0.9)
+    elif num_countries <= 20:
+        # Moderate - smaller font, more columns
+        ax.legend(loc='best', fontsize=8, framealpha=0.9, ncol=2)
+    else:
+        # Many countries - legend outside plot area on the right
+        ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', 
+                 fontsize=7, framealpha=0.9, ncol=1)
     
     # Grid for easier reading
     ax.grid(True, alpha=0.3, linestyle='--')
@@ -174,13 +197,16 @@ def generate_summary_table(
     # Auto-select numeric columns if not specified
     if metrics is None:
         numeric_cols = data.select_dtypes(include=['float64', 'int64']).columns
-        # Prioritize key metrics
-        priority_metrics = ['life_expect', 'adult_mortality', 'infant_mort', 'bmi']
-        metrics = [col for col in priority_metrics if col in numeric_cols]
         
-        # If no priority metrics, use all numeric except year
-        if not metrics:
-            metrics = [col for col in numeric_cols if col != 'year']
+        # Use all numeric columns except the grouping column itself and 'year' (unless grouping by year)
+        metrics = [col for col in numeric_cols 
+                  if col != group_by and (col != 'year' or group_by == 'year')]
+        
+        # Sort metrics: prioritize common health indicators first, then alphabetically
+        priority_order = ['life_expect', 'adult_mortality', 'infant_mort', 'bmi', 'alcohol']
+        priority = [m for m in priority_order if m in metrics]
+        others = sorted([m for m in metrics if m not in priority_order])
+        metrics = priority + others
     
     # Generate summary statistics
     summary_data = []

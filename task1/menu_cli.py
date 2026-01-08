@@ -40,7 +40,12 @@ class AnalysisSession:
         data = self.original_data.copy()
         
         if 'country' in self.filters and self.filters['country']:
-            data = data[data['country'] == self.filters['country']]
+            countries = self.filters['country']
+            # Support both single country (str) and multiple countries (list)
+            if isinstance(countries, list):
+                data = data[data['country'].isin(countries)]
+            else:
+                data = data[data['country'] == countries]
         if 'region' in self.filters and self.filters['region']:
             data = data[data['region'] == self.filters['region']]
         if 'year_min' in self.filters:
@@ -80,7 +85,14 @@ class AnalysisSession:
         if self.filters:
             parts = []
             if 'country' in self.filters:
-                parts.append(f"Country={self.filters['country']}")
+                countries = self.filters['country']
+                if isinstance(countries, list):
+                    if len(countries) <= 3:
+                        parts.append(f"Country={', '.join(countries)}")
+                    else:
+                        parts.append(f"Country={len(countries)} countries")
+                else:
+                    parts.append(f"Country={countries}")
             if 'region' in self.filters:
                 parts.append(f"Region={self.filters['region']}")
             if 'year_min' in self.filters or 'year_max' in self.filters:
@@ -117,16 +129,16 @@ def print_main_menu():
     print("  2.3 - Filter by year range")
     print("  2.4 - Clear all filters")
     print("  2.5 - Preview current dataset")
+    print("  2.6 - Export filtered data to CSV")
     
     print("\n" + "="*50)
     print(" 3. DATA CLEANING (Quality Control) ★")
     print("="*50)
-    print("  3.1 - Handle missing values")
-    print("  3.2 - Remove duplicates")
-    print("  3.3 - Data quality report")
-    print("  3.4 - Apply full cleaning pipeline (in-memory)")
-    print("  3.5 - Clean database directly (SQL-based) 🆕")
-    print("  ⚠️  3.1-3.4 apply to filtered data, 3.5 modifies database")
+    print("  3.1 - Create cleaned database from CSV (Pipeline Mode)")
+    print("      → Uses cleaner.py to clean data during CSV import")
+    print("  3.2 - Clean existing database (SQL Mode)")
+    print("      → Uses SQL UPDATE to clean data in-place")
+    print("  ⚠️  Both options will show Data Quality Report after cleaning")
     
     print("\n" + "="*50)
     print(" 4. DATA SUMMARIZATION (Analysis)")
@@ -134,13 +146,8 @@ def print_main_menu():
     print("  4.1 - Correlation analysis")
     print("  4.2 - Country comparison")
     print("  4.3 - Statistical summary")
-    
-    print("\n" + "="*50)
-    print(" 5. DATA PRESENTATION (Export & Visualization)")
-    print("="*50)
-    print("  5.1 - Export current data to CSV")
-    print("  5.2 - Visualize trends (matplotlib)")
-    print("  5.3 - Generate summary table (pandas)")
+    print("  4.4 - Visualize trends (matplotlib)")
+    print("  4.5 - Generate summary table (pandas)")
     
     print("\n" + "="*50)
     print(" OTHER OPTIONS")
@@ -196,16 +203,33 @@ def cmd_view_info(session: AnalysisSession):
 
 
 def cmd_filter_country(session: AnalysisSession):
-    """Filter by country."""
+    """Filter by country (supports multiple countries)."""
     print("\n" + "="*50)
     print("FILTER BY COUNTRY")
     print("="*50)
     
-    country = input("\nEnter country name: ").strip()
-    if country:
-        session.apply_filter(country=country)
-        get_logger().log_filter("country", country)
-        print(f"\n✅ Filtered to {len(session.filtered_data)} records")
+    # Show available countries
+    data = session.get_current_data()
+    countries = sorted(data['country'].unique())
+    print(f"\n💡 {len(countries)} countries available")
+    print("   (Enter country names separated by commas for multiple selection)")
+    print("\n📋 Example: China, India, United States")
+    
+    country_input = input("\n🔍 Enter country name(s): ").strip()
+    if country_input:
+        # Split by comma and clean up whitespace
+        country_list = [c.strip() for c in country_input.split(',')]
+        
+        # If only one country, use string; if multiple, use list
+        if len(country_list) == 1:
+            session.apply_filter(country=country_list[0])
+            get_logger().log_filter("country", country_list[0])
+            print(f"\n✅ Filtered to '{country_list[0]}': {len(session.filtered_data)} records")
+        else:
+            session.apply_filter(country=country_list)
+            get_logger().log_filter("country", ', '.join(country_list))
+            print(f"\n✅ Filtered to {len(country_list)} countries: {len(session.filtered_data)} records")
+            print(f"   Countries: {', '.join(country_list)}")
     else:
         print("\n❌ No country entered")
     
@@ -297,38 +321,91 @@ def cmd_preview_data(session: AnalysisSession):
     input("\n\n📌 Press Enter to continue...")
 
 
-def cmd_handle_missing(session: AnalysisSession):
-    """Handle missing values."""
+def cmd_create_cleaned_db(session: AnalysisSession):
+    """Create cleaned database from CSV using cleaner.py."""
     print("\n" + "="*50)
-    print("HANDLE MISSING VALUES")
+    print("CREATE CLEANED DATABASE FROM CSV (Pipeline Mode)")
     print("="*50)
+    print("\nThis will:")
+    print("  1. Load CSV data")
+    print("  2. Apply cleaner.py cleaning logic")
+    print("  3. Create new SQLite database")
+    print("  4. Show data quality report")
+    print("\n💡 Cleaning rules (from cleaner.py):")
+    print("  • Convert invalid numeric values to None")
+    print("  • Validate year as integer")
+    print("  • Keep all rows (no deletion)")
     
-    data = session.get_current_data()
-    missing = data.isna().sum()
+    # Get CSV path
+    csv_path = input("\n📁 CSV file path (default: task1/data/life_expectancy.csv): ").strip()
+    if not csv_path:
+        csv_path = "task1/data/life_expectancy.csv"
     
-    print("\nMissing values:")
-    for col, count in missing.items():
-        if count > 0:
-            print(f"  {col}: {count}")
+    if not os.path.exists(csv_path):
+        print(f"\n❌ File not found: {csv_path}")
+        input("Press Enter to continue...")
+        return
     
-    if missing.sum() == 0:
-        print("\n✅ No missing values!")
-    else:
-        choice = input("\n1=Remove rows, 2=Fill mean, 0=Cancel: ")
-        if choice == "1":
-            data_cleaned = data.dropna()
-            session.cleaned_data = data_cleaned
-            session.is_cleaned = True
-            print(f"\n✅ Removed {len(data)-len(data_cleaned)} rows")
-        elif choice == "2":
-            data_cleaned = data.copy()
-            for col in data.select_dtypes(include=['float64', 'int64']).columns:
-                data_cleaned[col].fillna(data_cleaned[col].mean(), inplace=True)
-            session.cleaned_data = data_cleaned
-            session.is_cleaned = True
-            print("\n✅ Filled with means")
+    # Get output DB path
+    db_path = input("💾 Output database path (default: task1/data/cleaned_from_csv.db): ").strip()
+    if not db_path:
+        db_path = "task1/data/cleaned_from_csv.db"
     
-    input("Press Enter to continue...")
+    # Confirm
+    print(f"\n⚠️  Will create: {db_path}")
+    if os.path.exists(db_path):
+        print(f"   Existing database will be replaced!")
+    
+    confirm = input("\nProceed? (y/n): ").strip().lower()
+    if confirm != 'y':
+        print("\n❌ Cancelled")
+        input("Press Enter to continue...")
+        return
+    
+    try:
+        # Import create_db module
+        from task1.create_db import create_db_from_csv
+        
+        print("\n🔄 Creating cleaned database...")
+        created_db = create_db_from_csv(csv_path, db_path, use_demo_data=False)
+        
+        print("\n✅ Database created successfully!")
+        print(f"   Path: {created_db}")
+        
+        # Show quality report
+        print("\n" + "="*50)
+        print("DATA QUALITY REPORT")
+        print("="*50)
+        
+        # Load the new database and show stats
+        import sqlite3
+        import pandas as pd
+        
+        conn = sqlite3.connect(created_db)
+        df = pd.read_sql_query("SELECT * FROM life_expectancy", conn)
+        conn.close()
+        
+        print(f"\n📊 Total Records: {len(df)}")
+        print(f"   Countries: {df['country'].nunique() if 'country' in df.columns else 'N/A'}")
+        print(f"   Year Range: {df['year'].min() if 'year' in df.columns else 'N/A'} - {df['year'].max() if 'year' in df.columns else 'N/A'}")
+        
+        print("\n🔍 Missing Values After Cleaning:")
+        missing = df.isna().sum()
+        for col, count in missing.items():
+            if count > 0:
+                print(f"   {col}: {count} ({count/len(df)*100:.1f}%)")
+        
+        if missing.sum() == 0:
+            print("   ✅ No missing values!")
+        
+        get_logger().log_cleaning("CSV_PIPELINE", f"Created cleaned database: {created_db}")
+        
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+        import traceback
+        traceback.print_exc()
+    
+    input("\nPress Enter to continue...")
 
 
 def cmd_remove_duplicates(session: AnalysisSession):
@@ -405,44 +482,37 @@ def cmd_database_cleaning(session: AnalysisSession):
             session.original_data = None
             session.filtered_data = None
             session.cleaned_data = None
-            print("\n🔄 Session data cleared. Use option 1.1 to reload.")
+            print("\n🔄 Reloading cleaned data...")
+            
+            # Reload and show quality report
+            import pandas as pd
+            import sqlite3
+            conn = sqlite3.connect(session.db_path)
+            df = pd.read_sql_query("SELECT * FROM life_expectancy", conn)
+            conn.close()
+            session.original_data = df
+            
+            print("\n" + "="*50)
+            print("DATA QUALITY REPORT (After SQL Cleaning)")
+            print("="*50)
+            print(f"\n📊 Total Records: {len(df)}")
+            print(f"   Countries: {df['country'].nunique() if 'country' in df.columns else 'N/A'}")
+            print(f"   Year Range: {df['year'].min() if 'year' in df.columns else 'N/A'} - {df['year'].max() if 'year' in df.columns else 'N/A'}")
+            
+            print("\n🔍 Missing Values After Cleaning:")
+            missing = df.isna().sum()
+            for col, count in missing.items():
+                if count > 0:
+                    print(f"   {col}: {count} ({count/len(df)*100:.1f}%)")
+            
+            if missing.sum() == 0:
+                print("   ✅ No missing values!")
         else:
             print("\n❌ Cleaning cancelled.")
     except Exception as e:
         print(f"\n❌ Error during database cleaning: {e}")
     
     input("\nPress Enter to continue...")
-
-
-def cmd_full_cleaning(session: AnalysisSession):
-    """Apply full cleaning to in-memory data."""
-    print("\n" + "="*50)
-    print("FULL CLEANING PIPELINE (In-Memory)")
-    print("="*50)
-    
-    data = session.get_current_data()
-    print(f"\nStarting: {len(data)} records")
-    
-    print("\n1️⃣ Removing duplicates...")
-    data = data.drop_duplicates()
-    print(f"   → {len(data)} records")
-    
-    print("\n2️⃣ Handling missing values...")
-    for col in data.select_dtypes(include=['float64', 'int64']).columns:
-        data[col].fillna(data[col].mean(), inplace=True)
-    print(f"   → {len(data)} records")
-    
-    print("\n3️⃣ Standardizing...")
-    if 'region' in data.columns:
-        data['region'] = data['region'].str.strip().str.title()
-    print(f"   → {len(data)} records")
-    
-    session.cleaned_data = data
-    session.is_cleaned = True
-    
-    get_logger().log_cleaning("PIPELINE", f"In-memory cleaning: {len(data)} records cleaned")
-    print(f"\n✅ Complete! {len(data)} records")
-    input("Press Enter to continue...")
 
 
 def cmd_correlation_analysis(session: AnalysisSession):
@@ -470,24 +540,149 @@ def cmd_correlation_analysis(session: AnalysisSession):
 
 
 def cmd_country_comparison(session: AnalysisSession):
-    """Country comparison."""
+    """Compare life expectancy statistics across countries."""
     print("\n" + "="*50)
     print("COUNTRY COMPARISON")
     print("="*50)
+    print("\n💡 Compare mean/min/max life expectancy across countries")
     
     data = session.get_current_data()
     countries = sorted(data['country'].unique())
     
-    print(f"\nAvailable: {', '.join(countries[:10])}")
-    if len(countries) > 10:
-        print(f"... and {len(countries)-10} more")
+    print(f"\n📋 Available countries in current dataset: {len(countries)}")
     
-    input_str = input("\nEnter countries (comma-separated): ")
-    if input_str:
-        selected = [c.strip() for c in input_str.split(",")]
-        comparison = data[data['country'].isin(selected)].groupby('country')['life_expect'].agg(['mean', 'min', 'max'])
-        print("\n📊 Comparison:")
-        print(comparison)
+    # Smart default behavior
+    if len(countries) <= 5:
+        # Auto-compare all if 5 or fewer
+        print(f"   → Auto-comparing all {len(countries)} countries")
+        selected = countries
+    elif len(countries) <= 15:
+        # Show all and let user choose
+        for i, country in enumerate(countries, 1):
+            print(f"   {i:2d}. {country}")
+        
+        print("\n💡 Options:")
+        print("   • Enter country names (comma-separated): China, India")
+        print("   • Enter 'top5' to compare top 5 by average life expectancy")
+        print("   • Press Enter to compare all")
+        
+        input_str = input("\n🔍 Your choice: ").strip()
+        
+        if not input_str:
+            selected = countries[:10]  # Limit to 10 for readability
+            print(f"   → Comparing first 10 countries")
+        elif input_str.lower() == 'top5':
+            avg_life = data.groupby('country')['life_expect'].mean().sort_values(ascending=False)
+            selected = avg_life.head(5).index.tolist()
+            print(f"   → Comparing top 5 countries by life expectancy")
+        else:
+            selected = [c.strip() for c in input_str.split(",")]
+    else:
+        # Many countries - show sample and prompt
+        print(f"\n   Sample: {', '.join(countries[:10])}")
+        print(f"   ... and {len(countries)-10} more")
+        
+        print("\n💡 Options:")
+        print("   • Enter country names (comma-separated): China, India, United States")
+        print("   • Enter 'top5' to compare top 5 by average life expectancy")
+        print("   • Enter 'random5' to compare 5 random countries")
+        
+        input_str = input("\n🔍 Your choice: ").strip()
+        
+        if input_str.lower() == 'top5':
+            avg_life = data.groupby('country')['life_expect'].mean().sort_values(ascending=False)
+            selected = avg_life.head(5).index.tolist()
+            print(f"   → Comparing top 5 countries by life expectancy")
+        elif input_str.lower() == 'random5':
+            import random
+            selected = random.sample(countries, min(5, len(countries)))
+            print(f"   → Comparing 5 random countries")
+        elif input_str:
+            selected = [c.strip() for c in input_str.split(",")]
+        else:
+            print("\n❌ No selection made")
+            input("\nPress Enter to continue...")
+            return
+    
+    # Perform comparison
+    if selected:
+        comparison = data[data['country'].isin(selected)].groupby('country')['life_expect'].agg(['mean', 'min', 'max', 'count'])
+        comparison = comparison.sort_values('mean', ascending=False)
+        
+        print("\n" + "="*70)
+        print("📊 LIFE EXPECTANCY COMPARISON (sorted by mean)")
+        print("="*70)
+        print(f"\n{'Country':<30} {'Mean':>8} {'Min':>8} {'Max':>8} {'Years':>8}")
+        print("-"*70)
+        
+        for country, row in comparison.iterrows():
+            print(f"{country:<30} {row['mean']:>8.1f} {row['min']:>8.1f} {row['max']:>8.1f} {int(row['count']):>8}")
+        
+        print("="*70)
+        
+        # Generate visualization
+        print("\n📊 Generating comparison chart...")
+        try:
+            import matplotlib.pyplot as plt
+            import numpy as np
+            
+            fig, ax = plt.subplots(figsize=(12, 6))
+            
+            countries_list = comparison.index.tolist()
+            means = comparison['mean'].values
+            mins = comparison['min'].values
+            maxs = comparison['max'].values
+            
+            x = np.arange(len(countries_list))
+            width = 0.6
+            
+            # Bar chart with error bars
+            bars = ax.bar(x, means, width, label='Mean', alpha=0.8, color='steelblue', edgecolor='navy')
+            
+            # Add error bars (min to max range)
+            errors_low = means - mins
+            errors_high = maxs - means
+            ax.errorbar(x, means, yerr=[errors_low, errors_high], 
+                       fmt='none', ecolor='darkred', capsize=5, alpha=0.7, linewidth=2)
+            
+            # Add value labels on top of bars
+            for i, (bar, mean_val) in enumerate(zip(bars, means)):
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width()/2., height + 0.3,
+                       f'{mean_val:.1f}',
+                       ha='center', va='bottom', fontweight='bold', fontsize=10)
+            
+            # Adjust Y-axis to show differences better (don't start from 0)
+            y_min = min(mins) - 2
+            y_max = max(maxs) + 2
+            ax.set_ylim(y_min, y_max)
+            
+            ax.set_xlabel('Country', fontsize=12, fontweight='bold')
+            ax.set_ylabel('Life Expectancy (years)', fontsize=12, fontweight='bold')
+            ax.set_title('Life Expectancy Comparison (Mean with Min-Max Range)', 
+                        fontsize=14, fontweight='bold')
+            ax.set_xticks(x)
+            ax.set_xticklabels(countries_list, rotation=45, ha='right', fontsize=10)
+            ax.legend(loc='upper right')
+            ax.grid(axis='y', alpha=0.3, linestyle='--')
+            
+            plt.tight_layout()
+            
+            # Save to output folder
+            import os
+            output_dir = os.path.join(os.path.dirname(session.db_path), '..', 'output')
+            os.makedirs(output_dir, exist_ok=True)
+            output_path = os.path.join(output_dir, 'country_comparison.png')
+            plt.savefig(output_path, dpi=150, bbox_inches='tight')
+            
+            print(f"✅ Chart saved: {output_path}")
+            
+            # Show interactive window
+            print("📊 Opening chart window (close window to continue)...")
+            plt.show()
+            
+        except Exception as e:
+            print(f"⚠️  Could not generate chart: {e}")
     
     input("\nPress Enter to continue...")
 
@@ -529,6 +724,40 @@ def cmd_statistical_summary(session: AnalysisSession):
             print(f"   50%:   {stats['50%']:.2f}")
             print(f"   75%:   {stats['75%']:.2f}")
             print(f"   Max:   {stats['max']:.2f}")
+    
+    # Ask if user wants to export summary
+    export = input("\n💾 Export summary statistics to CSV? (y/n): ").strip().lower()
+    if export == 'y':
+        summary_data = []
+        for metric in key_metrics:
+            if metric in numeric_cols:
+                stats = data[metric].describe()
+                summary_data.append({
+                    'metric': metric,
+                    'count': int(stats['count']),
+                    'mean': stats['mean'],
+                    'std': stats['std'],
+                    'min': stats['min'],
+                    '25%': stats['25%'],
+                    '50%': stats['50%'],
+                    '75%': stats['75%'],
+                    'max': stats['max']
+                })
+        
+        import pandas as pd
+        summary_df = pd.DataFrame(summary_data)
+        
+        parts = []
+        if 'country' in session.filters:
+            parts.append(session.filters['country'])
+        if 'region' in session.filters:
+            parts.append(session.filters['region'])
+        
+        filename = f"summary_stats_{'_'.join(parts) if parts else 'all'}.csv"
+        filepath = f"task1/output/{filename}"
+        os.makedirs("task1/output", exist_ok=True)
+        summary_df.to_csv(filepath, index=False)
+        print(f"✅ Summary exported to: {filepath}")
     
     input("\nPress Enter to continue...")
 
@@ -614,28 +843,42 @@ def cmd_summary_table(session: AnalysisSession):
     else:
         print("\n📌 No filters applied (全部数据)")
     
+    # Smart options based on available columns
     print("\n📊 Group by options:")
-    print("  1 - Country (compare specific countries)")
-    print("  2 - Status (Developed vs Developing)")
-    print("  3 - Year (time-based comparison)")
+    options = {}
+    option_num = 1
     
-    choice = input("\nSelect grouping (1-3): ").strip()
+    if 'country' in data.columns:
+        print(f"  {option_num} - Country (compare specific countries)")
+        options[str(option_num)] = 'country'
+        option_num += 1
     
-    group_by_map = {
-        '1': 'country',
-        '2': 'status',
-        '3': 'year'
-    }
+    if 'region' in data.columns:
+        print(f"  {option_num} - Region (compare WHO regions)")
+        options[str(option_num)] = 'region'
+        option_num += 1
     
-    group_by = group_by_map.get(choice)
+    if 'status' in data.columns:
+        print(f"  {option_num} - Status (Developed vs Developing)")
+        options[str(option_num)] = 'status'
+        option_num += 1
     
-    if not group_by:
-        print("\n❌ Invalid choice")
+    if 'year' in data.columns:
+        print(f"  {option_num} - Year (time-based comparison)")
+        options[str(option_num)] = 'year'
+        option_num += 1
+    
+    if not options:
+        print("\n❌ No suitable columns for grouping")
         input("Press Enter to continue...")
         return
     
-    if group_by not in data.columns:
-        print(f"\n❌ Column '{group_by}' not found in data")
+    choice = input(f"\nSelect grouping (1-{len(options)}): ").strip()
+    
+    group_by = options.get(choice)
+    
+    if not group_by:
+        print("\n❌ Invalid choice")
         input("Press Enter to continue...")
         return
     
@@ -644,14 +887,77 @@ def cmd_summary_table(session: AnalysisSession):
         summary_df = generate_summary_table(data, group_by=group_by)
         
         get_logger().log_visualization("TABLE", f"Summary table grouped by {group_by}: {len(data)} records")
+        
+        # Display in readable block format instead of wide table
         print("\n" + "="*80)
         print(f"SUMMARY TABLE - Grouped by {group_by.upper()}")
         print("="*80)
-        print(summary_df.to_string(index=False))
+        
+        # Dynamically find all mean_* columns (these are the metrics)
+        mean_columns = [col for col in summary_df.columns if col.startswith('mean_')]
+        metrics = [col.replace('mean_', '') for col in mean_columns]
+        
+        print(f"\n💡 Displaying {len(metrics)} metrics for each {group_by}")
+        
+        # Iterate through each group
+        for idx, row in summary_df.iterrows():
+            group_name = row[group_by]
+            count = int(row['count']) if 'count' in row else 'N/A'
+            
+            print(f"\n📊 {group_name}")
+            print(f"   Records: {count}")
+            print("   " + "-" * 70)
+            
+            # Display all available metrics
+            for metric in metrics:
+                mean_col = f'mean_{metric}'
+                min_col = f'min_{metric}'
+                max_col = f'max_{metric}'
+                
+                if mean_col in row:
+                    mean_val = row[mean_col]
+                    
+                    # Skip if mean is NaN
+                    if pd.isna(mean_val):
+                        continue
+                    
+                    min_val = row[min_col] if min_col in row and not pd.isna(row[min_col]) else None
+                    max_val = row[max_col] if max_col in row and not pd.isna(row[max_col]) else None
+                    
+                    # Format metric name nicely
+                    metric_display = metric.replace('_', ' ').replace('-', ' ').title()
+                    if len(metric_display) > 25:
+                        metric_display = metric_display[:22] + "..."
+                    
+                    if min_val is not None and max_val is not None:
+                        print(f"   {metric_display:<28}: Mean={mean_val:>8.2f}  Range=[{min_val:.2f}, {max_val:.2f}]")
+                    else:
+                        print(f"   {metric_display:<28}: Mean={mean_val:>8.2f}")
+        
         print("\n" + "="*80)
         
+        # Ask if user wants to export summary table
+        export = input("\n💾 Export summary table to CSV? (y/n): ").strip().lower()
+        if export == 'y':
+            parts = []
+            if 'country' in session.filters:
+                parts.append(session.filters['country'])
+            if 'region' in session.filters:
+                parts.append(session.filters['region'])
+            
+            filename = f"summary_table_{group_by}_{'_'.join(parts) if parts else 'all'}.csv"
+            filepath = f"task1/output/{filename}"
+            os.makedirs("task1/output", exist_ok=True)
+            summary_df.to_csv(filepath, index=False)
+            print(f"✅ Summary table exported to: {filepath}")
+        
         # Show use case example
-        if group_by == 'status' and 'status' in data.columns:
+        if group_by == 'region':
+            print("\n💡 Research Use Case:")
+            print("   Compare health indicators across WHO regions.")
+            print("   Example: 'Western Pacific region showed mean life expectancy of X years")
+            print("   (range: Y-Z), compared to African region with mean of A years.'")
+        elif group_by == 'status' and 'status' in data.columns:
             print("\n💡 Research Use Case:")
             print("   This table helps compare developed vs developing countries.")
             print("   Example citation: 'Developed countries showed mean life expectancy")
@@ -697,15 +1003,11 @@ def run_menu_system(db_path: str):
             cmd_clear_filters(session)
         elif choice == "2.5":
             cmd_preview_data(session)
+        elif choice == "2.6":
+            cmd_export_csv(session)
         elif choice == "3.1":
-            cmd_handle_missing(session)
+            cmd_create_cleaned_db(session)
         elif choice == "3.2":
-            cmd_remove_duplicates(session)
-        elif choice == "3.3":
-            cmd_quality_report(session)
-        elif choice == "3.4":
-            cmd_full_cleaning(session)
-        elif choice == "3.5":
             cmd_database_cleaning(session)
         elif choice == "4.1":
             cmd_correlation_analysis(session)
@@ -713,11 +1015,9 @@ def run_menu_system(db_path: str):
             cmd_country_comparison(session)
         elif choice == "4.3":
             cmd_statistical_summary(session)
-        elif choice == "5.1":
-            cmd_export_csv(session)
-        elif choice == "5.2":
+        elif choice == "4.4":
             cmd_visualize_trends(session)
-        elif choice == "5.3":
+        elif choice == "4.5":
             cmd_summary_table(session)
         elif choice == "h":
             show_workflow_guide()
