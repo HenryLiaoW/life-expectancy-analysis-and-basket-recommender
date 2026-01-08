@@ -924,9 +924,7 @@ def cmd_top_improving_countries(session: AnalysisSession):
         try:
             output_path = generate_life_expectancy_trend_chart(
                 data=filtered_data,
-                title=f"Top {k} Improving Countries: Life Expectancy Trends",
-                output_dir="task1/output",
-                logger=get_logger()
+                output_path=f"task1/output/top_{k}_improving_countries.png"
             )
             
             print(f"\n✅ Chart saved: {output_path}")
