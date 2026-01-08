@@ -225,7 +225,7 @@ ls -lh task1/data/*.db
 
 ```bash
 # 方案A：从CSV创建完整数据库（3111条记录）
-python -m task1.pipeline_clean_export
+python -m task1.scripts.pipeline_clean_export
 
 # 方案B：创建演示数据库（13条记录，快速测试用）
 python -m task1.create_db --demo
