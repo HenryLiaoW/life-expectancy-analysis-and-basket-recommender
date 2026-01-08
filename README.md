@@ -24,11 +24,13 @@ PAI_SuhangLiao/
 │   │   └── ...
 │   │
 │   ├── main.py                     # Main entry point
-│   ├── menu_cli.py                 # Interactive analysis menu
-│   ├── analysis_cli.py             # Command-line analysis tool
-│   ├── data_filter.py              # Analysis functions (12 functions)
-│   ├── database_loader.py          # Database CRUD operations
-│   ├── cleaner.py                  # Data cleaning
+│   ├── quick_analysis.py           # Quick query CLI tool
+│   ├── scripts/                    # Demo & example scripts
+│   ├── src/                        # Core modules (10 modules)
+│   │   ├── menu_cli.py             # Interactive analysis menu
+│   │   ├── data_filter.py          # Analysis functions (12 functions)
+│   │   ├── database_loader.py      # Database CRUD operations
+│   │   └── cleaner.py              # Data cleaning
 │   └── tests/                      # Test suite (135 tests)
 │
 ├── task2/                          # Task 2: Country Connection Network System
@@ -61,7 +63,7 @@ PAI_SuhangLiao/
 python -m task1.main
 
 # Run command-line analysis tool
-python task1/analysis_cli.py --help
+python task1/quick_analysis.py --help
 
 # Run tests (135 tests)
 pytest task1/tests/ -v

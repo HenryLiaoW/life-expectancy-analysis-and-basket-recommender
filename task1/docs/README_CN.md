@@ -53,7 +53,7 @@
 ✅ **交互式CLI界面**  
 - `main.py`: 统一的菜单驱动系统，带会话管理
 - `menu_cli.py`: 增强的多国家过滤、智能默认值、CSV导出
-- `analysis_cli.py`: 数据分析和政策查询命令行工具
+- `quick_analysis.py`: 快速查询和批量分析命令行工具
 
 ✅ **数据可视化**  
 - 基于数据量的动态图表尺寸
@@ -85,12 +85,12 @@
 └─────────────────┬───────────────────┬───────────────────────┘
                   │                   │
        ┌──────────▼──────────┐    ┌──▼──────────────────┐
-       │    menu_cli.py      │    │  analysis_cli.py    │
+       │    menu_cli.py      │    │  quick_analysis.py  │
        │   (1100+行)         │    │   (393行)           │
-       │  交互式菜单          │    │  命令行工具          │
+       │  交互式菜单          │    │  快速查询工具        │
        │  - 多国家选择        │    │  - 快速查询          │
        │  - 智能默认值        │    │  - 政策分析          │
-       │  - CSV导出          │    │  - 批量过滤          │
+       │  - CSV导出          │    │  - 批量处理          │
        └──────────┬──────────┘    └──┬──────────────────┘
                   │                   │
         ┌─────────┴─────────┬─────────┴─────────┬─────────────┐
@@ -116,7 +116,7 @@ PAI_SuhangLiao/
 ├── task1/                          # 主应用代码
 │   ├── main.py                     # ⭐ 主入口（统一界面）
 │   ├── menu_cli.py                 # 交互式分析菜单
-│   ├── analysis_cli.py             # 命令行分析工具
+│   ├── quick_analysis.py           # 快速查询CLI工具
 │   │
 │   ├── data_loader.py              # CSV文件加载
 │   ├── cleaner.py                  # 数据清洗逻辑
@@ -126,9 +126,12 @@ PAI_SuhangLiao/
 │   ├── visualization.py            # 图表/表格生成
 │   ├── logger.py                   # 活动日志
 │   │
-│   ├── pipeline_clean_export.py    # 批处理管道
+│   ├── scripts/                     # 演示与示例脚本
+│   │   ├── pipeline_clean_export.py    # 批处理管道
+│   │   ├── demo_filtering_summary.py   # 5个工作流演示
+│   │   └── policy_analysis_demo.py     # 政策建议演示
+│   │
 │   ├── create_db.py                # 数据库初始化工具
-│   ├── demo_filtering_summary.py   # 5个工作流演示
 │   │
 │   ├── tests/                      # ⭐ TDD测试套件（158个测试）
 │   │   ├── conftest.py             # 共享fixtures
@@ -253,7 +256,7 @@ python task1/main.py
 
 ```bash
 # 运行完整数据集的综合演示
-python task1/policy_analysis_demo.py
+python task1/scripts/policy_analysis_demo.py
 
 # 演示内容包括：
 # - 非洲区域分析（799条记录，47个国家）
@@ -261,13 +264,13 @@ python task1/policy_analysis_demo.py
 # - 12个分析函数实战应用
 ```
 
-**方式C：命令行分析工具**
+**选项C: 快速查询工具**
 
 ```bash
-# 无需交互式菜单的直接查询
-python task1/analysis_cli.py info
-python task1/analysis_cli.py filter --country China
-python task1/analysis_cli.py policy --country India --target 75
+# 无需交互式菜单的直接查询 - 快速批量分析
+python task1/quick_analysis.py info
+python task1/quick_analysis.py filter --country China
+python task1/quick_analysis.py policy --country India --target 75
 ```
 
 ---
@@ -337,31 +340,31 @@ python task1/main.py --db task1/data/life_expectancy.db
 3. 输入k=5 → 查看前5名及增长统计
 4. 生成趋势图并导出CSV摘要
 
-### 分析CLI工具（数据分析与政策查询）
+### 快速分析工具（快速查询与批量处理）
 
-数据分析操作的命令行界面：
+用于快速数据查询的命令行界面，无需交互式菜单：
 
 ```bash
 # 显示数据库信息
-python task1/analysis_cli.py info
+python task1/quick_analysis.py info
 
 # 按国家过滤
-python task1/analysis_cli.py filter --country China
+python task1/quick_analysis.py filter --country China
 
 # 按年份范围过滤，带统计
-python task1/analysis_cli.py filter --year-min 2015 --year-max 2017 --stats
+python task1/quick_analysis.py filter --year-min 2015 --year-max 2017 --stats
 
 # 比较多个国家
-python task1/analysis_cli.py compare China India USA Brazil
+python task1/quick_analysis.py compare China India USA Brazil
 
 # 分析水资源影响
-python task1/analysis_cli.py analyze water-access --region Asia
+python task1/quick_analysis.py analyze water-access --region Asia
 
 # 获取政策建议
-python task1/analysis_cli.py policy --country India --target 75
+python task1/quick_analysis.py policy --country India --target 75
 
 # 显示帮助
-python task1/analysis_cli.py --help
+python task1/quick_analysis.py --help
 ```
 
 ### 运行测试
@@ -387,7 +390,7 @@ pytest task1/ --collect-only
 
 ```bash
 # 完整管道：清洗CSV → 创建数据库 → 生成报告
-python -m task1.pipeline_clean_export
+python -m task1.scripts.pipeline_clean_export
 
 # 输出：
 # - task1/data/life_expectancy_cleaned.csv
@@ -399,7 +402,7 @@ python -m task1.pipeline_clean_export
 
 ```bash
 # 运行5个工作流演示
-PYTHONPATH=$PWD python task1/demo_filtering_summary.py
+PYTHONPATH=$PWD python task1/scripts/demo_filtering_summary.py
 
 # 演示内容：
 # 1. 条件过滤（国家、年份、地区）

@@ -53,7 +53,7 @@ A comprehensive data analysis system for WHO life expectancy data (2015-2017, 18
 ✅ **Interactive CLI Interfaces**  
 - `main.py`: Unified menu-driven system with session management
 - `menu_cli.py`: Enhanced with multi-country filtering, smart defaults, CSV exports
-- `analysis_cli.py`: Command-line tool for data analysis and policy queries
+- `quick_analysis.py`: Command-line tool for quick queries and batch analysis
 
 ✅ **Data Visualization**  
 - Dynamic chart sizing based on data volume
@@ -85,12 +85,12 @@ A comprehensive data analysis system for WHO life expectancy data (2015-2017, 18
 └─────────────────┬───────────────────┬───────────────────────┘
                   │                   │
        ┌──────────▼──────────┐    ┌──▼──────────────────┐
-       │    menu_cli.py      │    │  analysis_cli.py    │
+       │    menu_cli.py      │    │  quick_analysis.py  │
        │   (1100+ lines)     │    │   (393 lines)       │
-       │  Interactive Menu   │    │  Command-line Tool  │
-       │  - Multi-country    │    │  - Quick queries    │
+       │  Interactive Menu   │    │  Quick Query Tool   │
+       │  - Multi-country    │    │  - Fast queries     │
        │  - Smart defaults   │    │  - Policy analysis  │
-       │  - CSV exports      │    │  - Batch filtering  │
+       │  - CSV exports      │    │  - Batch processing │
        └─────────┬───────────┘    └──┬──────────────────┘
                  │                    │
        └──────────┬──────────┘    └──┬──────────────────┘
@@ -118,7 +118,7 @@ PAI_SuhangLiao/
 ├── task1/                          # Main application code
 │   ├── main.py                     # ⭐ Main entry point (unified interface)
 │   ├── menu_cli.py                 # Interactive analysis menu
-│   ├── analysis_cli.py             # Command-line analysis tool
+│   ├── quick_analysis.py           # Quick query CLI tool
 │   │
 │   ├── data_loader.py              # CSV file loading
 │   ├── cleaner.py                  # Data cleaning logic
@@ -128,9 +128,12 @@ PAI_SuhangLiao/
 │   ├── visualization.py            # Chart/table generation
 │   ├── logger.py                   # Activity logging
 │   │
-│   ├── pipeline_clean_export.py    # Batch processing pipeline
+│   ├── scripts/                     # Demo & example scripts
+│   │   ├── pipeline_clean_export.py    # Batch processing pipeline
+│   │   ├── demo_filtering_summary.py   # 5 workflow demonstrations
+│   │   └── policy_analysis_demo.py     # Policy recommendation demo
+│   │
 │   ├── create_db.py                # Database initialization utility
-│   ├── demo_filtering_summary.py   # 5 workflow demonstrations
 │   │
 │   ├── tests/                      # ⭐ TDD test suite (158 tests)
 │   │   ├── conftest.py             # Shared fixtures
@@ -223,7 +226,7 @@ ls -lh task1/data/*.db
 
 ```bash
 # Option A: Create full database from CSV (3111 records)
-python -m task1.pipeline_clean_export
+python -m task1.scripts.pipeline_clean_export
 
 # Option B: Create demo database (13 records, for quick testing)
 python -m task1.create_db --demo
@@ -254,7 +257,7 @@ python task1/main.py
 
 ```bash
 # Run comprehensive demonstration with full dataset
-python task1/policy_analysis_demo.py
+python task1/scripts/policy_analysis_demo.py
 
 # This demonstrates:
 # - Africa regional analysis (799 records, 47 countries)
@@ -262,13 +265,13 @@ python task1/policy_analysis_demo.py
 # - All 12 analysis functions in action
 ```
 
-**Option C: Command-line Analysis Tool**
+**Option C: Quick Query Tool**
 
 ```bash
-# Direct queries without interactive menu
-python task1/analysis_cli.py info
-python task1/analysis_cli.py filter --country China
-python task1/analysis_cli.py policy --country India --target 75
+# Direct queries without interactive menu - fast batch analysis
+python task1/quick_analysis.py info
+python task1/quick_analysis.py filter --country China
+python task1/quick_analysis.py policy --country India --target 75
 ```
 
 ---
@@ -338,31 +341,31 @@ python task1/main.py --db task1/data/life_expectancy.db
 3. Input k=5 → View top 5 with improvement stats
 4. Generate trend chart and export CSV summary
 
-### Analysis CLI Tool (Data Analysis & Policy Queries)
+### Quick Analysis Tool (Fast Queries & Batch Processing)
 
-Command-line interface for data analysis operations:
+Command-line interface for quick data queries without interactive menu:
 
 ```bash
 # Show database information
-python task1/analysis_cli.py info
+python task1/quick_analysis.py info
 
 # Filter by country
-python task1/analysis_cli.py filter --country China
+python task1/quick_analysis.py filter --country China
 
 # Filter by year range with statistics
-python task1/analysis_cli.py filter --year-min 2015 --year-max 2017 --stats
+python task1/quick_analysis.py filter --year-min 2015 --year-max 2017 --stats
 
 # Compare countries
-python task1/analysis_cli.py compare China India USA Brazil
+python task1/quick_analysis.py compare China India USA Brazil
 
 # Analyze water access impact
-python task1/analysis_cli.py analyze water-access --region Asia
+python task1/quick_analysis.py analyze water-access --region Asia
 
 # Get policy recommendations
-python task1/analysis_cli.py policy --country India --target 75
+python task1/quick_analysis.py policy --country India --target 75
 
 # Show help
-python task1/analysis_cli.py --help
+python task1/quick_analysis.py --help
 ```
 
 ### Running Tests
@@ -388,7 +391,7 @@ pytest task1/ --collect-only
 
 ```bash
 # Full pipeline: Clean CSV → Create Database → Generate Reports
-python -m task1.pipeline_clean_export
+python -m task1.scripts.pipeline_clean_export
 
 # Output:
 # - task1/data/life_expectancy_cleaned.csv
@@ -400,7 +403,7 @@ python -m task1.pipeline_clean_export
 
 ```bash
 # Run 5 workflow demonstrations
-PYTHONPATH=$PWD python task1/demo_filtering_summary.py
+PYTHONPATH=$PWD python task1/scripts/demo_filtering_summary.py
 
 # Demonstrates:
 # 1. Conditional filtering (country, year, region)

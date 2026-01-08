@@ -30,7 +30,7 @@ from typing import Optional
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from task1.data_filter import (
+from task1.src.data_filter import (
     get_data_as_dataframe,
     filter_by_country,
     filter_by_year_range,
