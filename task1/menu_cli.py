@@ -148,6 +148,7 @@ def print_main_menu():
     print("  4.3 - Statistical summary")
     print("  4.4 - Visualize trends (matplotlib)")
     print("  4.5 - Generate summary table (pandas)")
+    print("  4.6 - Top improving countries (by life expectancy growth)")
     
     print("\n" + "="*50)
     print(" OTHER OPTIONS")
@@ -821,6 +822,134 @@ def cmd_visualize_trends(session: AnalysisSession):
     input("\nPress Enter to continue...")
 
 
+def cmd_top_improving_countries(session: AnalysisSession):
+    """Find and visualize top-k countries with fastest life expectancy improvement."""
+    from task1.visualization import generate_life_expectancy_trend_chart
+    
+    print("\n" + "="*50)
+    print("TOP IMPROVING COUNTRIES ANALYSIS")
+    print("="*50)
+    
+    data = session.get_current_data()
+    if len(data) == 0:
+        print("\n❌ No data available")
+        input("Press Enter to continue...")
+        return
+    
+    # Check if life_expect column exists
+    if 'life_expect' not in data.columns:
+        print("\n❌ Life expectancy data not found")
+        input("Press Enter to continue...")
+        return
+    
+    # Display filter context
+    if session.filters:
+        print("\n📌 Analyzing within current filters:")
+        for key, value in session.filters.items():
+            print(f"   • {key.title()}: {value}")
+    else:
+        print("\n📌 Analyzing all countries globally")
+    
+    # Calculate improvement for each country
+    print("\n🔄 Calculating life expectancy improvements...")
+    
+    improvements = []
+    for country in data['country'].unique():
+        country_data = data[data['country'] == country].sort_values('year')
+        
+        # Need at least 2 years of data
+        if len(country_data) < 2:
+            continue
+        
+        # Get earliest and latest life expectancy values
+        life_values = country_data['life_expect'].dropna()
+        if len(life_values) < 2:
+            continue
+        
+        earliest_year = country_data['year'].min()
+        latest_year = country_data['year'].max()
+        
+        earliest_life = country_data[country_data['year'] == earliest_year]['life_expect'].values[0]
+        latest_life = country_data[country_data['year'] == latest_year]['life_expect'].values[0]
+        
+        if pd.notna(earliest_life) and pd.notna(latest_life):
+            improvement = latest_life - earliest_life
+            improvements.append({
+                'country': country,
+                'year_start': int(earliest_year),
+                'year_end': int(latest_year),
+                'life_start': earliest_life,
+                'life_end': latest_life,
+                'improvement': improvement,
+                'years_span': int(latest_year - earliest_year)
+            })
+    
+    if not improvements:
+        print("\n❌ Insufficient data to calculate improvements")
+        input("Press Enter to continue...")
+        return
+    
+    # Sort by improvement (descending)
+    improvements_df = pd.DataFrame(improvements).sort_values('improvement', ascending=False)
+    
+    print(f"\n✅ Calculated improvements for {len(improvements_df)} countries")
+    
+    # Ask for top-k
+    try:
+        k_input = input("\n📊 How many top countries to analyze? (default: 5): ").strip()
+        k = int(k_input) if k_input else 5
+        k = max(1, min(k, len(improvements_df)))  # Ensure valid range
+    except ValueError:
+        k = 5
+        print("⚠️  Invalid input, using default k=5")
+    
+    # Get top k countries
+    top_k = improvements_df.head(k)
+    
+    print(f"\n🏆 Top {k} Improving Countries:")
+    print("=" * 80)
+    for idx, row in enumerate(top_k.itertuples(), 1):
+        print(f"{idx}. {row.country:25} "
+              f"{row.life_start:5.1f} → {row.life_end:5.1f} years "
+              f"(+{row.improvement:5.1f} over {row.years_span} years)")
+    
+    # Ask if user wants to visualize
+    visualize = input("\n📈 Generate trend chart for these countries? (y/n): ").strip().lower()
+    
+    if visualize == 'y':
+        # Filter data for top k countries
+        top_countries = top_k['country'].tolist()
+        filtered_data = data[data['country'].isin(top_countries)]
+        
+        try:
+            output_path = generate_life_expectancy_trend_chart(
+                data=filtered_data,
+                title=f"Top {k} Improving Countries: Life Expectancy Trends",
+                output_dir="task1/output",
+                logger=get_logger()
+            )
+            
+            print(f"\n✅ Chart saved: {output_path}")
+            print("📊 Opening chart window (close window to continue)...")
+            
+            import matplotlib.pyplot as plt
+            plt.show()
+            
+        except Exception as e:
+            print(f"\n⚠️  Could not generate chart: {e}")
+    
+    # Ask if user wants to export summary
+    export = input("\n💾 Export improvement summary to CSV? (y/n): ").strip().lower()
+    if export == 'y':
+        filename = f"top_{k}_improving_countries.csv"
+        filepath = f"task1/output/{filename}"
+        os.makedirs("task1/output", exist_ok=True)
+        top_k.to_csv(filepath, index=False)
+        print(f"✅ Summary exported to: {filepath}")
+    
+    input("\nPress Enter to continue...")
+
+
 def cmd_summary_table(session: AnalysisSession):
     """Generate pandas summary statistics table."""
     from task1.visualization import generate_summary_table
@@ -1019,6 +1148,8 @@ def run_menu_system(db_path: str):
             cmd_visualize_trends(session)
         elif choice == "4.5":
             cmd_summary_table(session)
+        elif choice == "4.6":
+            cmd_top_improving_countries(session)
         elif choice == "h":
             show_workflow_guide()
         elif choice == "0":
