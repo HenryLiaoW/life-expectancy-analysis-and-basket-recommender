@@ -18,7 +18,7 @@ import os
 # Ensure task1 module can be imported
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from task1.data_filter import (
+from task1.src.data_filter import (
     get_data_as_dataframe,
     filter_by_region,
     filter_by_country,

@@ -46,7 +46,7 @@ def print_main_menu():
 
 def run_data_analysis(db_path: str):
     """Launch data analysis menu."""
-    from task1.menu_cli import run_menu_system
+    from task1.src.menu_cli import run_menu_system
     
     print("\n🔄 Launching Data Analysis Pipeline...")
     print("="*60)
@@ -56,7 +56,7 @@ def run_data_analysis(db_path: str):
 
 def run_crud_operations(db_path: str):
     """Launch CRUD operations CLI - Interactive mode."""
-    from task1.database_loader import (
+    from task1.src.database_loader import (
         create_record, get_records_by_country, 
         update_record, delete_record, get_all_records
     )
@@ -303,7 +303,7 @@ def run_create_database():
     Returns:
         str: Path to created database, or None if cancelled/failed
     """
-    from task1.create_db import create_db_from_csv
+    from task1.src.create_db import create_db_from_csv
     
     print("\n🔄 Database Creation from CSV")
     print("="*60)

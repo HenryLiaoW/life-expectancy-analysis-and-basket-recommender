@@ -14,8 +14,8 @@ in cleaner.py, matching good modular design practices.
 import csv
 import os
 
-from task1.data_loader import load_csv
-from task1.cleaner import clean_row
+from task1.src.data_loader import load_csv
+from task1.src.cleaner import clean_row
 
 
 # --------------------------------------------------------------------
