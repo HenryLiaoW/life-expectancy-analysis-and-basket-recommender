@@ -129,6 +129,26 @@ def filter_by_region(df: pd.DataFrame, region: str) -> pd.DataFrame:
     return df[df["region"] == region]
 
 
+def filter_by_development_status(df: pd.DataFrame, status) -> pd.DataFrame:
+    """
+    Filter DataFrame by development status based on GNI per capita.
+    
+    TODO: Implement this function (TDD RED phase - stub only)
+    
+    Args:
+        df: Input DataFrame (must have 'gni_capita' column)
+        status: One of 'high', 'upper-middle', 'lower-middle', 'low'
+                Or a list of multiple statuses
+        
+    Returns:
+        Filtered DataFrame containing only specified income group(s)
+        
+    Raises:
+        NotImplementedError: Function not yet implemented
+    """
+    raise NotImplementedError("filter_by_development_status not yet implemented - TDD RED phase")
+
+
 def calculate_statistics(df: pd.DataFrame, column: str) -> Dict[str, Any]:
     """
     Calculate statistical metrics for a column.
