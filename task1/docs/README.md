@@ -45,8 +45,9 @@ A comprehensive data analysis system for WHO life expectancy data (2015-2017, 18
 - 28 test cases ensuring robustness
 
 ✅ **Advanced Data Filtering**  
-- 12 analysis functions in `data_filter.py`
+- 13 analysis functions in `data_filter.py`
 - Multi-country selection support (comma-separated input)
+- Development status filtering (World Bank GNI classification: high/upper-middle/lower-middle/low income)
 - Policy-oriented insights (water access, healthcare spending, vaccination)
 - Statistical summaries and trend analysis
 
@@ -303,9 +304,10 @@ python task1/main.py --db task1/data/life_expectancy.db
 - 2.1: Filter by country (supports multiple: "China, India, USA")
 - 2.2: Filter by region
 - 2.3: Filter by year range
-- 2.4: Clear all filters
-- 2.5: Preview current dataset
-- 2.6: Export filtered data to CSV ⭐
+- 2.4: Filter by development status (World Bank GNI classification)
+- 2.5: Clear all filters
+- 2.6: Preview current dataset
+- 2.7: Export filtered data to CSV ⭐
 
 **3. DATA CLEANING** - Quality control
 - 3.1: Create cleaned database from CSV (Pipeline Mode)

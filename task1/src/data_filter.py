@@ -133,20 +133,49 @@ def filter_by_development_status(df: pd.DataFrame, status) -> pd.DataFrame:
     """
     Filter DataFrame by development status based on GNI per capita.
     
-    TODO: Implement this function (TDD RED phase - stub only)
+    Uses World Bank classification (July 2024):
+    - High income (developed): GNI >= $14,006
+    - Upper middle income: $4,516 - $14,005
+    - Lower middle income: $1,146 - $4,515
+    - Low income: <= $1,145
     
     Args:
         df: Input DataFrame (must have 'gni_capita' column)
         status: One of 'high', 'upper-middle', 'lower-middle', 'low'
-                Or a list of multiple statuses
+                Or a list of multiple statuses for OR logic filtering
         
     Returns:
         Filtered DataFrame containing only specified income group(s)
         
     Raises:
-        NotImplementedError: Function not yet implemented
+        ValueError: If status is not recognized or gni_capita column missing
     """
-    raise NotImplementedError("filter_by_development_status not yet implemented - TDD RED phase")
+    if 'gni_capita' not in df.columns:
+        raise ValueError("DataFrame must have 'gni_capita' column")
+    
+    # World Bank classification thresholds (2024)
+    thresholds = {
+        'high': (14006, float('inf')),
+        'upper-middle': (4516, 14005),
+        'lower-middle': (1146, 4515),
+        'low': (0, 1145)
+    }
+    
+    # Convert single status to list for uniform processing
+    status_list = [status] if isinstance(status, str) else status
+    
+    # Validate all statuses
+    for s in status_list:
+        if s not in thresholds:
+            raise ValueError(f"Status must be one of {list(thresholds.keys())}")
+    
+    # Combine filters using OR logic for multiple statuses
+    combined_filter = pd.Series([False] * len(df), index=df.index)
+    for s in status_list:
+        min_gni, max_gni = thresholds[s]
+        combined_filter |= (df['gni_capita'] >= min_gni) & (df['gni_capita'] <= max_gni)
+    
+    return df[combined_filter]
 
 
 def calculate_statistics(df: pd.DataFrame, column: str) -> Dict[str, Any]:

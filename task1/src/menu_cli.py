@@ -127,9 +127,10 @@ def print_main_menu():
     print("  2.1 - Filter by country")
     print("  2.2 - Filter by region")
     print("  2.3 - Filter by year range")
-    print("  2.4 - Clear all filters")
-    print("  2.5 - Preview current dataset")
-    print("  2.6 - Export filtered data to CSV")
+    print("  2.4 - Filter by development status (GNI-based)")
+    print("  2.5 - Clear all filters")
+    print("  2.6 - Preview current dataset")
+    print("  2.7 - Export filtered data to CSV")
     
     print("\n" + "="*50)
     print(" 3. DATA CLEANING (Quality Control) ★")
@@ -277,6 +278,116 @@ def cmd_filter_year_range(session: AnalysisSession):
     input("Press Enter to continue...")
 
 
+def cmd_filter_development_status(session: AnalysisSession):
+    """Filter by development status based on GNI per capita."""
+    print("\n" + "="*50)
+    print("FILTER BY DEVELOPMENT STATUS")
+    print("="*50)
+    
+    current_data = session.get_current_data()
+    
+    # Show current filter context
+    years = sorted(current_data['year'].unique())
+    regions = sorted(current_data['region'].unique())
+    countries = sorted(current_data['country'].unique())
+    
+    print(f"\n📊 Current filter status:")
+    if len(years) == len(session.original_data['year'].unique()):
+        print(f"   ⭕ Year range: All years ({years[0]}-{years[-1]})")
+    else:
+        print(f"   ✅ Year range: {years[0]}-{years[-1]} ({len(years)} years)")
+    
+    if len(regions) == len(session.original_data['region'].unique()):
+        print(f"   ⭕ Regions: All regions ({len(regions)})")
+    else:
+        print(f"   ✅ Regions: {', '.join(regions)}")
+    
+    if len(countries) == session.original_data['country'].nunique():
+        print(f"   ⭕ Countries: All countries ({len(countries)})")
+    else:
+        print(f"   ✅ Countries: {len(countries)} selected")
+    
+    print("\n💰 World Bank Income Classification (2024):")
+    print("  1. High income (developed)      - GNI ≥ $14,006")
+    print("  2. Upper middle income          - GNI $4,516-$14,005")
+    print("  3. Lower middle income          - GNI $1,146-$4,515")
+    print("  4. Low income                   - GNI ≤ $1,145")
+    print("\n💡 Tip: Select multiple using commas (e.g., '1,2' or 'high,upper')")
+    
+    choice = input("\nSelect classification(s): ").strip()
+    if not choice:
+        return
+    
+    status_map = {
+        '1': ('high', 'high income (developed)'),
+        '2': ('upper-middle', 'upper middle income'),
+        '3': ('lower-middle', 'lower middle income'),
+        '4': ('low', 'low income'),
+        'high': ('high', 'high income (developed)'),
+        'high income': ('high', 'high income (developed)'),
+        'upper': ('upper-middle', 'upper middle income'),
+        'upper middle': ('upper-middle', 'upper middle income'),
+        'lower': ('lower-middle', 'lower middle income'),
+        'lower middle': ('lower-middle', 'lower middle income'),
+        'low': ('low', 'low income')
+    }
+    
+    # Parse comma-separated selections
+    selections = [s.strip() for s in choice.split(',')]
+    status_keys = []
+    status_labels = []
+    
+    for sel in selections:
+        choice_key = sel.lower()
+        if choice_key in status_map:
+            status_key, status_label = status_map[choice_key]
+            if status_key not in status_keys:  # Avoid duplicates
+                status_keys.append(status_key)
+                status_labels.append(status_label)
+        else:
+            print(f"\n❌ Invalid choice: {sel}")
+            input("\nPress Enter to continue...")
+            return
+    
+    if status_keys:
+        # Use list if multiple, single value if one
+        filter_input = status_keys if len(status_keys) > 1 else status_keys[0]
+        from task1.src.data_filter import filter_by_development_status
+        
+        try:
+            filtered = filter_by_development_status(current_data, filter_input)
+            
+            # Calculate average GNI per country and sort by GNI (descending)
+            country_gni = filtered.groupby('country')['gni_capita'].mean().sort_values(ascending=False)
+            countries_in_category = country_gni.index.tolist()
+            
+            # Display results
+            if len(status_labels) == 1:
+                print(f"\n✅ {status_labels[0].capitalize()} countries in selected period:")
+            else:
+                combined_label = ', '.join(status_labels)
+                print(f"\n✅ Selected classifications ({combined_label}):")
+            
+            print(f"   Total: {len(countries_in_category)} countries")
+            print(f"   (Sorted by average GNI, highest first)\n")
+            
+            # Display with rank numbers for clarity
+            for idx, country in enumerate(countries_in_category, 1):
+                avg_gni = country_gni[country]
+                print(f"   {idx:2d}. {country:<40} (avg GNI: ${avg_gni:,.0f})")
+            
+            # Apply filter
+            session.filtered_data = filtered
+            log_label = ', '.join(status_labels) if len(status_labels) > 1 else status_labels[0]
+            get_logger().log_filter("development_status", log_label)
+            print(f"\n📊 Result: {len(filtered)} records filtered")
+            
+        except ValueError as e:
+            print(f"\n❌ Error: {e}")
+    
+    input("\n\nPress Enter to continue...")
+
+
 def cmd_clear_filters(session: AnalysisSession):
     """Clear all filters."""
     session.clear_filters()
@@ -302,11 +413,16 @@ def cmd_preview_data(session: AnalysisSession):
         "💉 Vaccination": ["country", "year", "polio", "diphtheria"],
         "🏗️ Infrastructure": ["country", "year", "basic_water", "doctors", "hospitals"],
         "💰 Economic": ["country", "year", "gni_capita", "gghe-d", "che_gdp"],
-        "🌍 UNESCO Data": ["country", "year", "une_pop", "une_infant", "une_life", "une_hiv", "une_gni", 
-                          "une_poverty", "une_edu_spend", "une_literacy", "une_school"]
+        "🌍 UNESCO Data - Demographics & Health": ["country", "year", "une_pop", "une_infant", "une_life", "une_hiv"],
+        "🌍 UNESCO Data - Economic & Social": ["country", "year", "une_gni", "une_poverty", "une_edu_spend", "une_literacy", "une_school"]
     }
     
-    preview_data = data.head(10)
+    # Sort by GNI per capita (descending) if column exists
+    if 'gni_capita' in data.columns:
+        data_sorted = data.sort_values('gni_capita', ascending=False)
+        preview_data = data_sorted.head(10)
+    else:
+        preview_data = data.head(10)
     
     # Display each group separately
     for group_name, columns in column_groups.items():
@@ -527,6 +643,13 @@ def cmd_correlation_analysis(session: AnalysisSession):
     if len(data) < 10:
         print("\n⚠️  Need at least 10 records")
     else:
+        # Show context
+        countries = data['country'].unique()
+        if len(countries) == 1:
+            print(f"\n📍 Analysis for: {countries[0]} ({len(data)} records)")
+        else:
+            print(f"\n📍 Analysis scope: {len(countries)} countries, {len(data)} records")
+        
         print("\n📊 Correlation with Life Expectancy:")
         corr_cols = ['life_expect', 'basic_water', 'gghe-d', 'bmi', 'alcohol']
         available = [c for c in corr_cols if c in data.columns]
@@ -536,6 +659,10 @@ def cmd_correlation_analysis(session: AnalysisSession):
             for col, val in corr.items():
                 if col != 'life_expect':
                     print(f"  {col:<20} r = {val:6.3f}")
+        
+        if len(countries) == 1:
+            print("\n💡 Tip: Different countries may have different key factors.")
+            print("   Clear filters (2.4) to see global correlations.")
     
     input("\nPress Enter to continue...")
 
@@ -1127,10 +1254,12 @@ def run_menu_system(db_path: str):
         elif choice == "2.3":
             cmd_filter_year_range(session)
         elif choice == "2.4":
-            cmd_clear_filters(session)
+            cmd_filter_development_status(session)
         elif choice == "2.5":
-            cmd_preview_data(session)
+            cmd_clear_filters(session)
         elif choice == "2.6":
+            cmd_preview_data(session)
+        elif choice == "2.7":
             cmd_export_csv(session)
         elif choice == "3.1":
             cmd_create_cleaned_db(session)
