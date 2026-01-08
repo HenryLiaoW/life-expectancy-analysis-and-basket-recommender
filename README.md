@@ -13,25 +13,23 @@ This repository contains Task 1 and Task 2 of the Programming for Artificial Int
 ```
 PAI_SuhangLiao/
 ├── task1/                          # Task 1: Life Expectancy Data Analysis System
-│   ├── docs/                       # 📚 All project documentation
-│   │   ├── README.md               # ⭐ Complete project documentation
+│   ├── docs/                       # 📚 Project documentation
+│   │   ├── README.md               # ⭐ Complete documentation (English)
 │   │   ├── README_CN.md            # 中文版项目文档
-│   │   ├── REFLECTIVE_REPORT.md    # Academic reflection report
-│   │   ├── REQUIREMENTS_ANALYSIS.md
-│   │   ├── SOLID_PRINCIPLES_ANALYSIS.md
-│   │   ├── CLI_ARCHITECTURE.md
-│   │   ├── ROBUSTNESS_ANALYSIS.md
-│   │   └── ...
+│   │   ├── FURPS+&MoSCoW.md        # Requirements analysis
+│   │   ├── SOLID.md                # SOLID principles analysis
+│   │   └── DRY_ANALYSIS.md         # DRY principle analysis
 │   │
 │   ├── main.py                     # Main entry point
 │   ├── quick_analysis.py           # Quick query CLI tool
 │   ├── scripts/                    # Demo & example scripts
 │   ├── src/                        # Core modules (10 modules)
 │   │   ├── menu_cli.py             # Interactive analysis menu
-│   │   ├── data_filter.py          # Analysis functions (12 functions)
+│   │   ├── data_filter.py          # Analysis functions (13 functions)
 │   │   ├── database_loader.py      # Database CRUD operations
 │   │   └── cleaner.py              # Data cleaning
-│   └── tests/                      # Test suite (135 tests)
+│   └── tests/                      # Test suite (167 tests)
+│       ├── test_development_status_filter.py # 32 tests
 │
 ├── task2/                          # Task 2: Country Connection Network System
 │   ├── README.md                   # ⭐ Complete Task 2 documentation
@@ -65,7 +63,7 @@ python -m task1.main
 # Run command-line analysis tool
 python task1/quick_analysis.py --help
 
-# Run tests (135 tests)
+# Run tests (167 tests)
 pytest task1/tests/ -v
 ```
 
@@ -92,11 +90,12 @@ python task2/verify_performance_metrics.py
 ## 📊 Project Highlights
 
 ### Task 1: Life Expectancy Analysis
-- **135 automated tests** with TDD methodology
+- **167 automated tests** with TDD methodology (including 32 for development status filter)
 - **SOLID principles** applied throughout design
 - **Policy-oriented analysis** focusing on modifiable health factors
+- **Development status filtering** by World Bank GNI classification (high/upper-middle/lower-middle/low)
 - **3 CLI interfaces** for different user workflows
-- **3,111 WHO records** covering 183 countries (2015-2017)
+- **3,111 WHO records** covering 183 countries (2000-2016)
 
 ### Task 2: Country Connection Network
 - **85 automated tests** with edge case coverage
@@ -114,9 +113,9 @@ python task2/verify_performance_metrics.py
 | Document | Description |
 |----------|-------------|
 | [README.md](task1/docs/README.md) | Complete project documentation (English) |
-| [README_CN.md](task1/docs/README_CN.md) | 完整项目文档（中文） |
-| [REFLECTIVE_REPORT.md](task1/docs/REFLECTIVE_REPORT.md) | Academic reflection on methodological choices |
-| [REQUIREMENTS_ANALYSIS.md](task1/docs/REQUIREMENTS_ANALYSIS.md) | Detailed requirements analysis |
+| [FURPS+&MoSCoW.md](task1/docs/FURPS+&MoSCoW.md) | Requirements analysis with FURPS+ methodology |
+| [SOLID.md](task1/docs/SOLID.md) | SOLID principles analysis with evidence |
+| [DRY_ANALYSIS.md](task1/docs/DRY_ANALYSIS.md) | DRY principle implementation analysis
 | [SOLID_PRINCIPLES_ANALYSIS.md](task1/docs/SOLID_PRINCIPLES_ANALYSIS.md) | SOLID principles application |
 
 ### Task 2 Documentation ([`task2/`](task2/))
@@ -131,10 +130,10 @@ python task2/verify_performance_metrics.py
 
 ## 🎯 Assessment Criteria Addressed
 
-✅ **Functional Requirements**: Task 1 (data analysis) + Task 2 (graph-based recommendations)  
-✅ **Software Quality**: TDD methodology, 220+ automated tests (135 + 85)  
-✅ **Design Principles**: SOLID principles with documented evidence in both tasks  
+✅ **Functional Requirements**: Task 1 (dat52 automated tests (167 + 85)  
+✅ **Design Principles**: SOLID & DRY principles with documented evidence in both tasks  
 ✅ **Code Clarity**: Comprehensive docstrings, type hints, clear structure  
+✅ **Version Control**: Git repository with complete test coverage and TDD commit history
 ✅ **Version Control**: Git repository with test files (test_main.py for both tasks)  
 ✅ **Documentation**: Complete READMEs with run commands, edge case testing, performance verification
 
