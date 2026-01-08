@@ -36,7 +36,7 @@ Design Philosophy | 设计哲学：
 
 import os
 import pytest
-from task1.database_loader import create_database, load_data_to_db
+from task1.src.database_loader import create_database, load_data_to_db
 
 # Test database path
 TEST_DB_PATH = "task1/data/test_filter.db"

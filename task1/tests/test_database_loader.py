@@ -14,7 +14,7 @@ Run with: pytest task1/tests/test_database_loader_NEW.py -v
 import os
 import sqlite3
 import pytest
-from task1.database_loader import (
+from task1.src.database_loader import (
     create_database,
     load_data_to_db,
     get_all_records,
@@ -331,7 +331,7 @@ def test_get_records_by_year_range_raises_error_for_invalid_range(clean_test_db)
 
 def test_update_record_by_country_year_updates_single_field(clean_test_db):
     """Test updating a specific field for a country-year record."""
-    from task1.database_loader import update_record
+    from task1.src.database_loader import update_record
     
     create_database(TEST_DB_PATH)
     
@@ -353,7 +353,7 @@ def test_update_record_by_country_year_updates_single_field(clean_test_db):
 
 def test_update_record_updates_multiple_fields(clean_test_db):
     """Test updating multiple fields in one operation."""
-    from task1.database_loader import update_record
+    from task1.src.database_loader import update_record
     
     create_database(TEST_DB_PATH)
     
@@ -375,7 +375,7 @@ def test_update_record_updates_multiple_fields(clean_test_db):
 
 def test_update_record_raises_error_for_nonexistent_record(clean_test_db):
     """Test that updating non-existent record raises ValueError."""
-    from task1.database_loader import update_record
+    from task1.src.database_loader import update_record
     
     create_database(TEST_DB_PATH)
     
@@ -386,7 +386,7 @@ def test_update_record_raises_error_for_nonexistent_record(clean_test_db):
 
 def test_update_record_validates_empty_updates(clean_test_db):
     """Test that empty updates dict raises ValueError."""
-    from task1.database_loader import update_record
+    from task1.src.database_loader import update_record
     
     create_database(TEST_DB_PATH)
     
@@ -399,7 +399,7 @@ def test_update_record_validates_empty_updates(clean_test_db):
 
 def test_delete_record_by_country_year_removes_single_record(clean_test_db):
     """Test deleting a specific country-year record."""
-    from task1.database_loader import delete_record
+    from task1.src.database_loader import delete_record
     
     create_database(TEST_DB_PATH)
     
@@ -420,7 +420,7 @@ def test_delete_record_by_country_year_removes_single_record(clean_test_db):
 
 def test_delete_record_raises_error_for_nonexistent_record(clean_test_db):
     """Test that deleting non-existent record raises ValueError."""
-    from task1.database_loader import delete_record
+    from task1.src.database_loader import delete_record
     
     create_database(TEST_DB_PATH)
     
@@ -430,7 +430,7 @@ def test_delete_record_raises_error_for_nonexistent_record(clean_test_db):
 
 def test_delete_all_records_for_country_removes_multiple_records(clean_test_db):
     """Test deleting all records for a specific country."""
-    from task1.database_loader import delete_records_by_country
+    from task1.src.database_loader import delete_records_by_country
     
     create_database(TEST_DB_PATH)
     
@@ -457,7 +457,7 @@ def test_delete_all_records_for_country_removes_multiple_records(clean_test_db):
 
 def test_delete_records_by_country_returns_zero_for_nonexistent(clean_test_db):
     """Test that deleting non-existent country returns 0."""
-    from task1.database_loader import delete_records_by_country
+    from task1.src.database_loader import delete_records_by_country
     
     create_database(TEST_DB_PATH)
     
@@ -467,7 +467,7 @@ def test_delete_records_by_country_returns_zero_for_nonexistent(clean_test_db):
 
 def test_create_record_inserts_new_record(clean_test_db):
     """Test creating a new record in the database."""
-    from task1.database_loader import create_record
+    from task1.src.database_loader import create_record
     
     create_database(TEST_DB_PATH)
     
@@ -489,7 +489,7 @@ def test_create_record_inserts_new_record(clean_test_db):
 
 def test_create_record_raises_error_for_duplicate(clean_test_db):
     """Test that creating duplicate country-year raises ValueError."""
-    from task1.database_loader import create_record
+    from task1.src.database_loader import create_record
     
     create_database(TEST_DB_PATH)
     
@@ -507,7 +507,7 @@ def test_create_record_raises_error_for_duplicate(clean_test_db):
 
 def test_delete_records_by_region_removes_all_regional_data(clean_test_db):
     """Test deleting all records for a specific region."""
-    from task1.database_loader import delete_records
+    from task1.src.database_loader import delete_records
     
     create_database(TEST_DB_PATH)
     
@@ -531,7 +531,7 @@ def test_delete_records_by_region_removes_all_regional_data(clean_test_db):
 
 def test_delete_records_by_year_removes_specific_year(clean_test_db):
     """Test deleting all records for a specific year."""
-    from task1.database_loader import delete_records
+    from task1.src.database_loader import delete_records
     
     create_database(TEST_DB_PATH)
     
@@ -555,7 +555,7 @@ def test_delete_records_by_year_removes_specific_year(clean_test_db):
 
 def test_delete_records_with_multiple_filters(clean_test_db):
     """Test delete with combined filters (country + year)."""
-    from task1.database_loader import delete_records
+    from task1.src.database_loader import delete_records
     
     create_database(TEST_DB_PATH)
     
@@ -578,7 +578,7 @@ def test_delete_records_with_multiple_filters(clean_test_db):
 
 def test_delete_records_raises_error_for_empty_filters(clean_test_db):
     """Test that empty filters prevent accidental deletion of all data."""
-    from task1.database_loader import delete_records
+    from task1.src.database_loader import delete_records
     
     create_database(TEST_DB_PATH)
     

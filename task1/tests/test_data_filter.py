@@ -86,7 +86,7 @@ import os
 import sqlite3
 import pytest
 import pandas as pd
-from task1.data_filter import (
+from task1.src.data_filter import (
     get_data_as_dataframe,
     filter_by_country,
     filter_by_year_range,

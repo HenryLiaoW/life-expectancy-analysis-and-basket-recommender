@@ -7,7 +7,7 @@ Following TDD best practices:
 - Test integration (run_correlation_analysis with real data)
 """
 
-from task1.analysis_correlation import safe_float, pearson_corr, run_correlation_analysis
+from task1.src.analysis_correlation import safe_float, pearson_corr, run_correlation_analysis
 import pytest
 import math
 

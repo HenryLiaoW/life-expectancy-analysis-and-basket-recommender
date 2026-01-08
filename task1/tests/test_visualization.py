@@ -13,11 +13,11 @@ import pandas as pd
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
-from task1.visualization import (
+from task1.src.visualization import (
     generate_life_expectancy_trend_chart,
     generate_summary_table
 )
-from task1.database_loader import get_all_records
+from task1.src.database_loader import get_all_records
 
 
 def test_chart_generation():

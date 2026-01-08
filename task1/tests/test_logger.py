@@ -33,7 +33,7 @@ class TestLogger:
     
     def test_logger_basic_functionality(self):
         """Test core logging functionality."""
-        from task1.logger import ActivityLogger
+        from task1.src.logger import ActivityLogger
         
         logger = ActivityLogger(log_dir=self.test_log_dir)
         

@@ -1,6 +1,6 @@
 import os
 import pytest
-from task1.data_loader import load_csv
+from task1.src.data_loader import load_csv
 
 def test_load_csv_returns_list():#测试load_csv函数是否返回列表
     """Basic TDD step: loader should always return a list."""

@@ -88,7 +88,7 @@ class TestPrintFunctions:
 class TestDataAnalysisRouting:
     """Test suite for data analysis pipeline routing."""
     
-    @patch('task1.menu_cli.run_menu_system')
+    @patch('task1.src.menu_cli.run_menu_system')
     def test_run_data_analysis_calls_menu_system(self, mock_menu, capsys):
         """Test that run_data_analysis calls the menu system."""
         test_db = "test.db"
@@ -102,7 +102,7 @@ class TestDataAnalysisRouting:
         captured = capsys.readouterr()
         assert "Launching Data Analysis Pipeline" in captured.out
     
-    @patch('task1.menu_cli.run_menu_system')
+    @patch('task1.src.menu_cli.run_menu_system')
     def test_run_data_analysis_with_different_paths(self, mock_menu):
         """Test data analysis routing with various database paths."""
         test_paths = [
@@ -116,7 +116,7 @@ class TestDataAnalysisRouting:
             run_data_analysis(path)
             mock_menu.assert_called_once_with(path)
     
-    @patch('task1.menu_cli.run_menu_system')
+    @patch('task1.src.menu_cli.run_menu_system')
     def test_run_data_analysis_prints_header(self, mock_menu, capsys):
         """Test that data analysis prints a proper header."""
         run_data_analysis("test.db")
@@ -132,7 +132,7 @@ class TestCRUDOperationsRouting:
     """Test suite for CRUD operations routing."""
     
     @patch('builtins.input', side_effect=['back'])
-    @patch('task1.database_loader.get_all_records')
+    @patch('task1.src.database_loader.get_all_records')
     def test_run_crud_operations_exits_on_back(self, mock_records, mock_input, capsys):
         """Test CRUD interface exits when user types 'back'."""
         test_db = "test.db"
@@ -146,7 +146,7 @@ class TestCRUDOperationsRouting:
         assert "Returning" in captured.out or "main menu" in captured.out
     
     @patch('builtins.input', side_effect=['help', 'back'])
-    @patch('task1.database_loader.get_all_records')
+    @patch('task1.src.database_loader.get_all_records')
     def test_run_crud_operations_shows_help(self, mock_records, mock_input, capsys):
         """Test CRUD help command displays available commands."""
         run_crud_operations("test.db")
@@ -161,7 +161,7 @@ class TestCRUDOperationsRouting:
         assert 'list' in output_lower
     
     @patch('builtins.input', side_effect=['list', 'back'])
-    @patch('task1.database_loader.get_all_records')
+    @patch('task1.src.database_loader.get_all_records')
     def test_run_crud_operations_list_command(self, mock_records, mock_input, capsys):
         """Test CRUD list command displays records."""
         # Mock database records
@@ -180,7 +180,7 @@ class TestCRUDOperationsRouting:
         mock_records.assert_called()
     
     @patch('builtins.input', side_effect=['invalid_command', 'back'])
-    @patch('task1.database_loader.get_all_records')
+    @patch('task1.src.database_loader.get_all_records')
     def test_run_crud_operations_handles_invalid_command(self, mock_records, mock_input, capsys):
         """Test CRUD interface handles invalid commands gracefully."""
         run_crud_operations("test.db")
@@ -205,7 +205,7 @@ class TestDatabaseCreation:
     
     @patch('builtins.input', side_effect=['3', '', 'yes'])
     @patch('os.path.exists', return_value=False)
-    @patch('task1.create_db.create_db_from_csv')
+    @patch('task1.src.create_db.create_db_from_csv')
     def test_run_create_database_demo_option(self, mock_create, mock_exists, mock_input, capsys):
         """Test database creation with demo data option."""
         mock_create.return_value = "task1/data/CLI_demo.db"
@@ -241,7 +241,7 @@ class TestEdgeCases:
         except Exception as e:
             pytest.fail(f"Print functions should not raise exceptions: {e}")
     
-    @patch('task1.menu_cli.run_menu_system', side_effect=Exception("Test error"))
+    @patch('task1.src.menu_cli.run_menu_system', side_effect=Exception("Test error"))
     def test_run_data_analysis_handles_menu_errors(self, mock_menu):
         """Test that data analysis handles errors from menu system."""
         # Should not crash even if menu_system raises exception
@@ -252,7 +252,7 @@ class TestEdgeCases:
             pytest.fail(f"Should propagate menu system errors: {e}")
     
     @patch('builtins.input', side_effect=['0'])  # Exit immediately
-    @patch('task1.database_loader.get_all_records')
+    @patch('task1.src.database_loader.get_all_records')
     def test_run_crud_operations_handles_exit_variants(self, mock_records, mock_input):
         """Test CRUD operations accepts various exit commands."""
         exit_commands = ['back', '0', 'exit', 'quit']
@@ -269,7 +269,7 @@ class TestEdgeCases:
 class TestIntegration:
     """Integration tests for main CLI components."""
     
-    @patch('task1.menu_cli.run_menu_system')
+    @patch('task1.src.menu_cli.run_menu_system')
     def test_data_analysis_pipeline_integration(self, mock_menu, capsys):
         """Test complete data analysis pipeline flow."""
         test_db = "task1/data/CLI_demo.db"
@@ -286,7 +286,7 @@ class TestIntegration:
         assert "=" in captured.out, "Should have formatted output"
     
     @patch('builtins.input', side_effect=['help', 'list', 'back'])
-    @patch('task1.database_loader.get_all_records', return_value=[])
+    @patch('task1.src.database_loader.get_all_records', return_value=[])
     def test_crud_operations_workflow(self, mock_records, mock_input, capsys):
         """Test typical CRUD operations workflow."""
         test_db = "test.db"

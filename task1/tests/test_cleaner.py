@@ -1,4 +1,4 @@
-from task1.cleaner import clean_numeric, clean_row
+from task1.src.cleaner import clean_numeric, clean_row
 import pytest
 
 # ---------------------------------------------------
