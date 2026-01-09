@@ -20,6 +20,12 @@ from task1.scripts.pipeline_clean_export import export_cleaned_dataset
 from task1.src.database_cleaner import clean_database_full, print_cleaning_report
 from task1.src.create_db import create_db_from_csv
 
+# Get paths relative to project root
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
+INPUT_CSV = os.path.join(DATA_DIR, 'life_expectancy.csv')
+CLEANED_CSV = os.path.join(DATA_DIR, 'test_cleaned_via_pipeline.csv')
+PIPELINE_DB = os.path.join(DATA_DIR, 'test_database_mode.db')
+
 
 def test_pipeline_mode():
     """Test Pipeline Mode: CSV → Python Clean → CSV → DB"""
@@ -29,18 +35,15 @@ def test_pipeline_mode():
     
     # Step 1: Clean CSV
     print("\n📋 Step 1: Cleaning CSV with Python...")
-    input_csv = "task1/data/life_expectancy.csv"
-    cleaned_csv = "task1/data/test_cleaned_via_pipeline.csv"
     
-    export_cleaned_dataset(input_csv, cleaned_csv)
+    export_cleaned_dataset(INPUT_CSV, CLEANED_CSV)
     
     # Step 2: Load cleaned CSV to database
     print("\n📋 Step 2: Loading cleaned CSV to database...")
-    pipeline_db = "task1/data/test_database_mode.db"
-    create_db_from_csv(cleaned_csv, pipeline_db, use_demo_data=False)
+    create_db_from_csv(CLEANED_CSV, PIPELINE_DB, use_demo_data=False)
     
     print("\n✅ Pipeline Mode Test PASSED")
-    assert os.path.exists(pipeline_db), f"Pipeline database not created: {pipeline_db}"
+    assert os.path.exists(PIPELINE_DB), f"Pipeline database not created: {PIPELINE_DB}"
 
 
 def test_database_mode():
@@ -51,17 +54,15 @@ def test_database_mode():
     
     # Step 1: Load raw CSV to database
     print("\n📋 Step 1: Loading raw CSV to database...")
-    raw_csv = "task1/data/life_expectancy.csv"
-    db_mode_db = "task1/data/test_database_mode.db"
-    create_db_from_csv(raw_csv, db_mode_db, use_demo_data=False)
+    create_db_from_csv(INPUT_CSV, PIPELINE_DB, use_demo_data=False)
     
     # Step 2: Clean database with SQL
     print("\n📋 Step 2: Cleaning database with SQL...")
-    results = clean_database_full(db_mode_db, dry_run=False)
+    results = clean_database_full(PIPELINE_DB, dry_run=False)
     print_cleaning_report(results)
     
     print("\n✅ Database Mode Test PASSED")
-    assert os.path.exists(db_mode_db), f"Database mode database not created: {db_mode_db}"
+    assert os.path.exists(PIPELINE_DB), f"Database mode database not created: {PIPELINE_DB}"
 
 
 def compare_results(pipeline_db, db_mode_db):

@@ -19,6 +19,11 @@ from task1.src.visualization import (
 )
 from task1.src.database_loader import get_all_records
 
+# Get paths relative to project root
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
+OUTPUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'output')
+CLI_DEMO_DB = os.path.join(DATA_DIR, 'CLI_demo.db')
+
 
 def test_chart_generation():
     """Test that chart generation works correctly."""
@@ -28,13 +33,12 @@ def test_chart_generation():
     
     # Load data from demo database
     print("\n📋 Step 1: Loading data from CLI_demo.db...")
-    db_path = "task1/data/CLI_demo.db"
     
-    if not os.path.exists(db_path):
-        print(f"❌ Database not found: {db_path}")
+    if not os.path.exists(CLI_DEMO_DB):
+        print(f"❌ Database not found: {CLI_DEMO_DB}")
         return False
     
-    records = get_all_records(db_path)
+    records = get_all_records(CLI_DEMO_DB)
     data = pd.DataFrame(records)
     print(f"✅ Loaded {len(data)} records")
     
@@ -45,7 +49,7 @@ def test_chart_generation():
     
     # Generate chart using visualization module
     print("\n📋 Step 3: Generating chart with visualization.py...")
-    output_path = "task1/output/test_life_expectancy_trends.png"
+    output_path = os.path.join(OUTPUT_DIR, 'test_life_expectancy_trends.png')
     
     result_path = generate_life_expectancy_trend_chart(
         data=china_data,
@@ -83,11 +87,10 @@ def test_table_generation():
     
     # Load data
     print("\n📋 Step 1: Loading data from CLI_demo.db...")
-    db_path = "task1/data/CLI_demo.db"
     
-    assert os.path.exists(db_path), f"Database not found: {db_path}"
+    assert os.path.exists(CLI_DEMO_DB), f"Database not found: {CLI_DEMO_DB}"
     
-    records = get_all_records(db_path)
+    records = get_all_records(CLI_DEMO_DB)
     data = pd.DataFrame(records)
     print(f"✅ Loaded {len(data)} records")
     
