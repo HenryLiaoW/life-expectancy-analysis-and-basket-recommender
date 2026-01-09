@@ -32,17 +32,29 @@ PAI_SuhangLiao/
 │       ├── test_development_status_filter.py # 32 tests
 │
 ├── task2/                          # Task 2: Country Connection Network System
-│   ├── README.md                   # ⭐ Complete Task 2 documentation
-│   ├── src/                        # Source code
-│   │   ├── main.py                 # Entry point (interactive menu)
-│   │   ├── recommendation_engine.py # Core graph analysis
-│   │   ├── network_visualizer.py   # Graphviz visualization
-│   │   └── cli.py                  # Command-line interface
-│   ├── tests/                      # Test suite (85 tests)
-│   │   ├── test_main.py            # Edge cases & integration tests
-│   │   └── ...
+│   ├── docs/                       # 📚 Project documentation
+│   │   ├── README.md               # ⭐ Complete documentation (English)
+│   │   ├── README_CN.md            # 中文版项目文档
+│   │   ├── FURPS+&MoSCoW.md        # Requirements analysis
+│   │   ├── SOLID.md                # SOLID principles analysis
+│   │   └── DRY_ANALYSIS.md         # DRY principle analysis
+│   │
+│   ├── main.py                     # Entry point (interactive menu)
+│   ├── cli.py                      # Command-line interface
 │   ├── verify_performance_metrics.py # Performance verification script
-│   └── PERFORMANCE_VERIFICATION.txt  # Timestamped results
+│   ├── PERFORMANCE_VERIFICATION.txt  # Timestamped results
+│   │
+│   ├── src/                        # Core modules
+│   │   ├── graph_adjacency_list.py  # Graph implementation
+│   │   ├── graph_interface.py       # Graph interface
+│   │   ├── recommendation_engine.py # Core graph analysis
+│   │   └── analyze_graph_density.py # Density analysis
+│   │
+│   └── tests/                      # Test suite (85 tests)
+│       ├── test_main.py            # 44 tests (edge cases & integration)
+│       ├── test_recommendation_engine.py # 24 tests
+│       ├── test_graph_adjacency_list.py  # 16 tests
+│       └── test_smoke.py           # 1 test
 │
 └── pytest.ini                      # Test configuration
 
@@ -69,14 +81,14 @@ pytest task1/tests/ -v
 
 ### Task 2: Country Connection Network
 
-**Complete Documentation**: [task2/README.md](task2/README.md)
+**Complete Documentation**: [task2/docs/README.md](task2/docs/README.md) | [中文版](task2/docs/README_CN.md)
 
 ```bash
 # Run interactive menu (recommended)
-python task2/src/main.py
+python task2/main.py
 
 # Run CLI with specific query
-python task2/src/cli.py --country "United Kingdom" --top-k 10
+python task2/cli.py --country "United Kingdom" --top-k 10
 
 # Run tests (85 tests)
 pytest task2/tests/ -v
@@ -113,16 +125,20 @@ python task2/verify_performance_metrics.py
 | Document | Description |
 |----------|-------------|
 | [README.md](task1/docs/README.md) | Complete project documentation (English) |
+| [README_CN.md](task1/docs/README_CN.md) | 完整项目文档（中文） |
 | [FURPS+&MoSCoW.md](task1/docs/FURPS+&MoSCoW.md) | Requirements analysis with FURPS+ methodology |
 | [SOLID.md](task1/docs/SOLID.md) | SOLID principles analysis with evidence |
-| [DRY_ANALYSIS.md](task1/docs/DRY_ANALYSIS.md) | DRY principle implementation analysis
-| [SOLID_PRINCIPLES_ANALYSIS.md](task1/docs/SOLID_PRINCIPLES_ANALYSIS.md) | SOLID principles application |
+| [DRY_ANALYSIS.md](task1/docs/DRY_ANALYSIS.md) | DRY principle implementation analysis |
 
-### Task 2 Documentation ([`task2/`](task2/))
+### Task 2 Documentation ([`task2/docs/`](task2/docs/))
 
 | Document | Description |
 |----------|-------------|
-| [README.md](task2/README.md) | Complete Task 2 documentation with SOLID/FURPS+ analysis |
+| [README.md](task2/docs/README.md) | Complete project documentation (English) |
+| [README_CN.md](task2/docs/README_CN.md) | 完整项目文档（中文） |
+| [FURPS+&MoSCoW.md](task2/docs/FURPS+&MoSCoW.md) | Requirements analysis with FURPS+ methodology |
+| [SOLID.md](task2/docs/SOLID.md) | SOLID principles analysis with evidence |
+| [DRY_ANALYSIS.md](task2/docs/DRY_ANALYSIS.md) | DRY principle implementation analysis |
 | [verify_performance_metrics.py](task2/verify_performance_metrics.py) | Automated performance verification script |
 | [PERFORMANCE_VERIFICATION.txt](task2/PERFORMANCE_VERIFICATION.txt) | Timestamped performance test results |
 
