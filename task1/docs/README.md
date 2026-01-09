@@ -30,7 +30,7 @@ A comprehensive data analysis system for WHO life expectancy data (2015-2017, 18
 1. **Data Pipeline**: Load → Clean → Store → Query → Analyze → Visualize
 2. **Policy Focus**: Identify modifiable factors that impact life expectancy
 3. **Interactive System**: Two CLI interfaces for different use cases
-4. **Software Quality**: TDD methodology with 158 automated tests
+4. **Software Quality**: TDD methodology with 167 automated tests
 
 ### Key Features
 
