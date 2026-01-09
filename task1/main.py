@@ -296,7 +296,6 @@ def run_crud_operations(db_path: str):
             print(f"\n❌ Unknown command: '{cmd}'")
             print("💡 Type 'help' for available commands")
 
-
 def run_create_database():
     """Interactive database creation from CSV.
     
@@ -360,7 +359,7 @@ def run_create_database():
         print("\n" + "="*60)
         print("✅ Database created successfully!")
         print("="*60)
-        print(f"\n� Database path: {created_db}")
+        print(f"\n💾 Database path: {created_db}")
         
         return created_db
         
@@ -369,7 +368,6 @@ def run_create_database():
         import traceback
         traceback.print_exc()
         return None
-
 
 def main():
     """Main entry point."""

@@ -7,6 +7,7 @@ Designed for AI/DS teams: Access → Filter → Clean → Summarize → Present
 import os
 import sys
 import pandas as pd
+import glob
 from typing import Optional, Dict, Any
 
 from task1.src.database_loader import get_all_records, create_record, update_record, delete_record
@@ -76,6 +77,21 @@ class AnalysisSession:
         self.filtered_data = self.original_data.copy()
         self.is_cleaned = False
     
+    def switch_database(self, new_db_path: str) -> bool:
+        """Switch to a different database."""
+        try:
+            self.db_path = new_db_path
+            self.original_data = None
+            self.filtered_data = None
+            self.cleaned_data = None
+            self.filters = {}
+            self.is_cleaned = False
+            self.load_data()
+            return True
+        except Exception as e:
+            print(f"❌ Failed to switch database: {e}")
+            return False
+    
     def get_status_bar(self) -> str:
         """Generate status bar text."""
         data = self.get_current_data()
@@ -117,9 +133,10 @@ def print_header(session: AnalysisSession):
 def print_main_menu():
     """Print menu options."""
     print("\n" + "="*50)
-    print(" 1. DATA ACCESS (Database Management)")
+    print(" 1. DATABASE MANAGEMENT")
     print("="*50)
     print("  1.1 - View database info")
+    print("  1.2 - Switch database")
     
     print("\n" + "="*50)
     print(" 2. DATA FILTERING (Query & Selection)")
@@ -133,7 +150,7 @@ def print_main_menu():
     print("  2.7 - Export filtered data to CSV")
     
     print("\n" + "="*50)
-    print(" 3. DATA CLEANING (Quality Control) ★")
+    print(" 3. DATA CLEANING ★")
     print("="*50)
     print("  3.1 - Create cleaned database from CSV (Pipeline Mode)")
     print("      → Uses cleaner.py to clean data during CSV import")
@@ -142,7 +159,7 @@ def print_main_menu():
     print("  ⚠️  Both options will show Data Quality Report after cleaning")
     
     print("\n" + "="*50)
-    print(" 4. DATA SUMMARIZATION (Analysis)")
+    print(" 4. DATA ANALYSIS")
     print("="*50)
     print("  4.1 - Correlation analysis")
     print("  4.2 - Country comparison")
@@ -1227,6 +1244,74 @@ def cmd_summary_table(session: AnalysisSession):
     input("\nPress Enter to continue...")
 
 
+def cmd_switch_database(session: AnalysisSession):
+    """Switch to a different database."""
+    print("\n" + "="*50)
+    print("SWITCH DATABASE")
+    print("="*50)
+    
+    # Get the data directory path
+    current_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    data_dir = os.path.join(current_dir, 'task1', 'data')
+    
+    # Find all .db files
+    db_pattern = os.path.join(data_dir, '*.db')
+    db_files = glob.glob(db_pattern)
+    
+    if not db_files:
+        print("\n⚠️  No database files found in task1/data/")
+        input("\nPress Enter to continue...")
+        return
+    
+    # Display available databases
+    print(f"\n📁 Current database: {os.path.basename(session.db_path)}")
+    print(f"\n📋 Available databases in task1/data/:")
+    for idx, db_file in enumerate(db_files, 1):
+        db_name = os.path.basename(db_file)
+        file_size = os.path.getsize(db_file) / 1024  # KB
+        is_current = "(current)" if db_file == session.db_path else ""
+        print(f"  {idx}. {db_name:<40} {file_size:>8.1f} KB  {is_current}")
+    
+    print("\n💡 Tip: Enter number or full database name")
+    choice = input("\n🔍 Select database: ").strip()
+    
+    if not choice:
+        print("\n❌ No selection made")
+        input("\nPress Enter to continue...")
+        return
+    
+    # Try to parse as number first
+    selected_db = None
+    if choice.isdigit():
+        idx = int(choice) - 1
+        if 0 <= idx < len(db_files):
+            selected_db = db_files[idx]
+        else:
+            print(f"\n❌ Invalid number: {choice}")
+    else:
+        # Try to match by name
+        for db_file in db_files:
+            if os.path.basename(db_file) == choice or db_file == choice:
+                selected_db = db_file
+                break
+        if not selected_db:
+            print(f"\n❌ Database not found: {choice}")
+    
+    if selected_db:
+        if selected_db == session.db_path:
+            print("\n⚠️  Already using this database")
+        else:
+            print(f"\n🔄 Switching to {os.path.basename(selected_db)}...")
+            if session.switch_database(selected_db):
+                print(f"✅ Successfully switched to {os.path.basename(selected_db)}")
+                print(f"   Loaded {len(session.original_data)} records")
+                get_logger()._write_log("DATABASE", f"Switched to {selected_db}")
+            else:
+                print(f"❌ Failed to switch database")
+    
+    input("\nPress Enter to continue...")
+
+
 def run_menu_system(db_path: str):
     """Run interactive menu."""
     session = AnalysisSession(db_path)
@@ -1247,6 +1332,8 @@ def run_menu_system(db_path: str):
         
         if choice == "1.1":
             cmd_view_info(session)
+        elif choice == "1.2":
+            cmd_switch_database(session)
         elif choice == "2.1":
             cmd_filter_country(session)
         elif choice == "2.2":
