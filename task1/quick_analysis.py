@@ -30,6 +30,7 @@ from typing import Optional
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from task1.config import DEMO_DATABASE, DEFAULT_VACCINATION_THRESHOLD
 from task1.src.data_filter import (
     get_data_as_dataframe,
     filter_by_country,
@@ -45,10 +46,8 @@ from task1.src.data_filter import (
     get_policy_intervention_priorities,
 )
 
-# Default database path
-# During development/testing: use demo.db for fast feedback (TDD)
-# For production: change to life_expectancy.db
-DEFAULT_DB = "task1/data/demo.db"
+# Default database path for fast feedback in CLI usage.
+DEFAULT_DB = str(DEMO_DATABASE)
 
 
 class LifeExpectancyCLI:
@@ -176,8 +175,8 @@ class LifeExpectancyCLI:
                 print(f"  {region:15} {bmi:.1f}  {status}")
         
         elif args.analysis_type == 'vaccination':
-            gaps = identify_vaccination_gaps(df, threshold=args.threshold or 90.0)
-            print(f"\n💉 Vaccination Coverage Gaps (< {args.threshold or 90}%)")
+            gaps = identify_vaccination_gaps(df, threshold=args.threshold or DEFAULT_VACCINATION_THRESHOLD)
+            print(f"\n💉 Vaccination Coverage Gaps (< {args.threshold or DEFAULT_VACCINATION_THRESHOLD}%)")
             if gaps.empty:
                 print("\n✓ No significant gaps found!")
             else:

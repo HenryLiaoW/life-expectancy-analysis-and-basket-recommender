@@ -8,6 +8,7 @@ Demonstrates filtering and summary capabilities:
 4. Grouped results (by country, region)
 """
 
+from task1.config import DEMO_DATABASE
 from task1.src.data_filter import (
     get_data_as_dataframe,
     filter_by_country,
@@ -25,7 +26,7 @@ def demo_filtering():
     print("1. Conditional Data Filtering")
     print("="*50)
     
-    db_path = "task1/data/CLI_demo.db"
+    db_path = str(DEMO_DATABASE)
     df = get_data_as_dataframe(db_path)
     
     print(f"\nOriginal data: {len(df)} records")
@@ -60,7 +61,7 @@ def demo_summary_statistics():
     print("2. Summary Statistics")
     print("="*50)
     
-    db_path = "task1/data/CLI_demo.db"
+    db_path = str(DEMO_DATABASE)
     df = get_data_as_dataframe(db_path)
     
     # 2.1 Global statistics
@@ -90,7 +91,7 @@ def demo_trends_over_time():
     print("3. Trends Over Time")
     print("="*50)
     
-    db_path = "task1/data/CLI_demo.db"
+    db_path = str(DEMO_DATABASE)
     
     # 3.1 Single country trend
     print("\n✅ China life expectancy trend (2015-2017):")
@@ -120,7 +121,7 @@ def demo_grouped_results():
     print("4. Grouped Results (by country, region)")
     print("="*50)
     
-    db_path = "task1/data/CLI_demo.db"
+    db_path = str(DEMO_DATABASE)
     df = get_data_as_dataframe(db_path)
     
     # 4.1 Country comparison (latest year)
@@ -159,7 +160,7 @@ def demo_advanced_use_case():
     print("5. Advanced Use Case - Regional Comparison")
     print("="*50)
     
-    db_path = "task1/data/CLI_demo.db"
+    db_path = str(DEMO_DATABASE)
     df = get_data_as_dataframe(db_path)
     
     print("\n✅ Asia vs Americas water access comparison (2015-2017):")

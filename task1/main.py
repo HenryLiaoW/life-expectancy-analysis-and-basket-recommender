@@ -19,6 +19,8 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
+from task1.config import RAW_LIFE_EXPECTANCY_CSV, TEST_DATABASE, DEMO_DATABASE
+
 
 def print_welcome():
     """Print welcome banner."""
@@ -309,15 +311,15 @@ def run_create_database():
     
     # Ask for CSV path
     print("\n📂 CSV File:")
-    print("  1 - Full dataset (task1/data/life_expectancy.csv)")
+    print(f"  1 - Full dataset ({RAW_LIFE_EXPECTANCY_CSV})")
     print("  2 - Custom CSV file")
     print("  3 - Demo data (12 records)")
     
     choice = input("\nSelect CSV source: ").strip()
     
     if choice == '1':
-        csv_path = "task1/data/life_expectancy.csv"
-        db_default = "task1/data/test_life_expectancy.db"
+        csv_path = str(RAW_LIFE_EXPECTANCY_CSV)
+        db_default = str(TEST_DATABASE)
         use_demo = False
     elif choice == '2':
         csv_path = input("Enter CSV file path: ").strip()
@@ -328,7 +330,7 @@ def run_create_database():
         use_demo = False
     elif choice == '3':
         csv_path = None
-        db_default = "task1/data/CLI_demo.db"
+        db_default = str(DEMO_DATABASE)
         use_demo = True
     else:
         print("\n❌ Invalid choice")
@@ -375,7 +377,7 @@ def main():
     
     # Get script directory to build absolute path
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    default_db = os.path.join(script_dir, "data", "CLI_demo.db")
+    default_db = str(DEMO_DATABASE)
     
     parser = argparse.ArgumentParser(
         description="Life Expectancy Data Insights System - Main Entry Point"

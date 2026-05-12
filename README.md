@@ -1,172 +1,213 @@
-# PAI Individual Assignment - Suhang Liao
+# PAI Individual Assignment - Data Analysis & Recommendation Systems
 
-**Module**: WM9QF-15 Programming for Artificial Intelligence  
-**Date**: December 2025  
-**Repository**: https://github.com/HenryLiaoW/PAI_SuhangLiao
+This repository contains two Python projects completed for **WM9QF-15 Programming for Artificial Intelligence** at the University of Warwick:
+
+1. **Life Expectancy Data Analysis System** - a data cleaning, SQLite storage, analysis, and visualisation pipeline for WHO-style life expectancy data.
+2. **Supermarket Recommendation System** - a graph-based market-basket recommendation engine built from transaction records.
+
+The project was originally developed as an individual coursework submission, but the codebase is structured as a reproducible analytics portfolio project: data loading, cleaning, persistence, querying, analysis, visualisation, testing, and documentation are all included.
 
 ---
 
-## 📁 Project Structure
+## Portfolio Summary
 
-This repository contains Task 1 and Task 2 of the Programming for Artificial Intelligence individual assignment.
+| Area | Evidence |
+|---|---|
+| Data analysis | Filtering, descriptive statistics, trend analysis, Pearson correlation, policy-oriented analysis |
+| Data infrastructure | SQLite schema creation, indexed tables, CRUD operations, batch loading, transaction-safe writes |
+| Recommendation systems | Graph-based co-occurrence analysis, frequent-pair mining, basket recommendations |
+| Software quality | 252 automated tests across both tasks, TDD workflow, SOLID/DRY documentation |
+| Reproducibility | CLI entry points, fixed project structure, included datasets, documented run commands |
 
-```
+## Key Results
+
+- Processed **3,111 life-expectancy records** covering **183 countries** from **2000-2016**.
+- Built a Load-Clean-Store-Query-Analyze-Visualize workflow using Python and SQLite.
+- Implemented indexed SQLite tables and CRUD operations for structured analytical queries.
+- Built a supermarket recommendation system from **38,765 transaction records**.
+- Constructed a co-purchase graph with **167 items** and **6,260 edges**.
+- Verified recommendation performance with a mean query latency of **16.40 microseconds** in the project benchmark.
+
+---
+
+## Repository Structure
+
+```text
 PAI_SuhangLiao/
-├── task1/                          # Task 1: Life Expectancy Data Analysis System
-│   ├── docs/                       # 📚 Project documentation
-│   │   ├── README.md               # ⭐ Complete documentation (English)
-│   │   ├── README_CN.md            # 中文版项目文档
-│   │   ├── FURPS+&MoSCoW.md        # Requirements analysis
-│   │   ├── SOLID.md                # SOLID principles analysis
-│   │   └── DRY_ANALYSIS.md         # DRY principle analysis
-│   │
-│   ├── main.py                     # Main entry point
-│   ├── quick_analysis.py           # Quick query CLI tool
-│   ├── scripts/                    # Demo & example scripts
-   ├── src/                        # Core modules (11 modules)
-   │   ├── menu_cli.py             # Interactive analysis menu
-   │   ├── data_filter.py          # Analysis functions (14 functions)
-│   │   ├── database_loader.py      # Database CRUD operations
-│   │   └── cleaner.py              # Data cleaning
-│   └── tests/                      # Test suite (167 tests)
-│       ├── test_development_status_filter.py # 32 tests
+├── task1/                         # Life Expectancy Data Analysis System
+│   ├── data/                      # Source and cleaned datasets
+│   ├── docs/                      # Detailed task documentation
+│   ├── output/                    # Example analysis outputs and charts
+│   ├── scripts/                   # Demo and batch-processing scripts
+│   ├── src/                       # Core modules
+│   │   ├── cleaner.py             # CSV cleaning pipeline
+│   │   ├── database_loader.py     # SQLite schema, loading, CRUD operations
+│   │   ├── database_cleaner.py    # SQL-based cleaning operations
+│   │   ├── data_filter.py         # Analysis and filtering functions
+│   │   ├── analysis_correlation.py# Pearson correlation analysis
+│   │   ├── visualization.py       # PNG/CSV output generation
+│   │   └── menu_cli.py            # Interactive analysis interface
+│   └── tests/                     # Task 1 test suite
 │
-├── task2/                          # Task 2: Supermarket Recommendation System
-│   ├── docs/                       # 📚 Project documentation
-│   │   ├── README.md               # ⭐ Complete documentation (English)
-│   │   ├── README_CN.md            # 中文版项目文档
-│   │   ├── FURPS+&MoSCoW.md        # Requirements analysis
-│   │   ├── SOLID.md                # SOLID principles analysis
-│   │   └── DRY_ANALYSIS.md         # DRY principle analysis
-│   │
-│   ├── main.py                     # Entry point (interactive menu)
-│   ├── cli.py                      # Command-line interface
-│   ├── verify_performance_metrics.py # Performance verification script
-│   ├── PERFORMANCE_VERIFICATION.txt  # Timestamped results
-│   │
-│   ├── src/                        # Core modules
-│   │   ├── graph_adjacency_list.py  # Graph implementation (adjacency list)
-│   │   ├── graph_interface.py       # Graph interface (ABC)
-│   │   ├── recommendation_engine.py # Market basket analysis engine
-│   │   └── analyze_graph_density.py # Density analysis
-│   │
-│   └── tests/                      # Test suite (85 tests)
-│       ├── test_main.py            # 56 tests (integration & edge cases)
-│       ├── test_recommendation_engine.py # 24 tests
-│       ├── test_graph_adjacency_list.py  # 16 tests
-│       └── test_smoke.py           # 1 smoke test
+├── task2/                         # Supermarket Recommendation System
+│   ├── data/                      # Transaction dataset
+│   ├── docs/                      # Detailed task documentation
+│   ├── src/                       # Graph and recommendation modules
+│   │   ├── graph_interface.py
+│   │   ├── graph_adjacency_list.py
+│   │   ├── recommendation_engine.py
+│   │   └── analyze_graph_density.py
+│   ├── tests/                     # Task 2 test suite
+│   └── verify_performance_metrics.py
 │
-└── pytest.ini                      # Test configuration
-
+├── requirements.txt
+├── pytest.ini
+└── README.md
 ```
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
-### Task 1: Life Expectancy Data Analysis
-
-**Complete Documentation**: [task1/docs/README.md](task1/docs/README.md) | [中文版](task1/docs/README_CN.md)
+### 1. Install dependencies
 
 ```bash
-# Run interactive menu (recommended)
-python -m task1.main
-
-# Run command-line analysis tool
-python -m task1.quick_analysis --help
-
-# Run tests (167 tests)
-pytest task1/tests/ -v
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-### Task 2: Supermarket Recommendation System
-
-**Complete Documentation**: [task2/docs/README.md](task2/docs/README.md) | [中文版](task2/docs/README_CN.md)
+### 2. Run Task 1: Life Expectancy Analysis
 
 ```bash
-# Run interactive menu (recommended)
+python -m task1.main
+```
+
+Quick command-line analysis:
+
+```bash
+python -m task1.quick_analysis --help
+```
+
+Example demo scripts:
+
+```bash
+python task1/scripts/pipeline_clean_export.py
+python task1/scripts/demo_filtering_summary.py
+python task1/scripts/policy_analysis_demo.py
+```
+
+### 3. Run Task 2: Supermarket Recommendation
+
+```bash
 python -m task2.main
+```
 
-# Run CLI (interactive mode)
+Alternative CLI:
+
+```bash
 python -m task2.cli
+```
 
-# Run tests (85 tests)
-pytest task2/tests/ -v
+Performance benchmark:
 
-# Verify performance metrics
+```bash
 python task2/verify_performance_metrics.py
 ```
 
----
+### 4. Run tests
 
-## 📊 Project Highlights
-
-### Task 1: Life Expectancy Analysis
-- **167 automated tests** with TDD methodology (including 32 for development status filter)
-- **SOLID principles** applied throughout design
-- **Policy-oriented analysis** focusing on modifiable health factors
-- **Development status filtering** by World Bank GNI classification (high/upper-middle/lower-middle/low)
-- **3 CLI interfaces** for different user workflows
-- **3,111 WHO records** covering 183 countries (2000-2016)
-
-### Task 2: Supermarket Recommendation System
-- **85 automated tests** with 100% pass rate (TDD approach)
-- **Graph-based co-occurrence analysis** using adjacency list
-- **Heap optimization**: O(E log k) instead of O(E log E) for Top-K
-- **Market basket analysis** for product recommendations
-- **Efficient pattern mining** from customer transaction data
+```bash
+pytest task1/tests/ -v
+pytest task2/tests/ -v
+```
 
 ---
 
-## 📚 Key Documentation
+## Task 1: Life Expectancy Data Analysis System
 
-### Task 1 Documentation ([`task1/docs/`](task1/docs/))
+Task 1 implements a complete analytics workflow for life-expectancy data:
 
-| Document | Description |
-|----------|-------------|
-| [README.md](task1/docs/README.md) | Complete project documentation (English) |
-| [README_CN.md](task1/docs/README_CN.md) | 完整项目文档（中文） |
-| [FURPS+&MoSCoW.md](task1/docs/FURPS+&MoSCoW.md) | Requirements analysis with FURPS+ methodology |
-| [SOLID.md](task1/docs/SOLID.md) | SOLID principles analysis with evidence |
-| [DRY_ANALYSIS.md](task1/docs/DRY_ANALYSIS.md) | DRY principle implementation analysis |
+- Load raw CSV records.
+- Clean and validate records.
+- Store cleaned data in SQLite.
+- Query records by country, year, region, and development status.
+- Generate descriptive statistics, trend summaries, correlation analysis, and visual outputs.
+- Export analysis results as CSV/PNG files.
 
-### Task 2 Documentation ([`task2/docs/`](task2/docs/))
+Important modules:
 
-| Document | Description |
-|----------|-------------|
-| [README.md](task2/docs/README.md) | Complete project documentation (English) |
-| [README_CN.md](task2/docs/README_CN.md) | 完整项目文档（中文） |
-| [FURPS+&MoSCoW.md](task2/docs/FURPS+&MoSCoW.md) | Requirements analysis with FURPS+ methodology |
-| [SOLID.md](task2/docs/SOLID.md) | SOLID principles analysis with evidence |
-| [DRY_ANALYSIS.md](task2/docs/DRY_ANALYSIS.md) | DRY principle implementation analysis |
-| [verify_performance_metrics.py](task2/verify_performance_metrics.py) | Automated performance verification script |
-| [PERFORMANCE_VERIFICATION.txt](task2/PERFORMANCE_VERIFICATION.txt) | Timestamped performance test results |
+- [`task1/src/database_loader.py`](task1/src/database_loader.py): SQLite schema creation, indexes, batch loading, CRUD operations.
+- [`task1/src/data_filter.py`](task1/src/data_filter.py): analytical filters and summary functions.
+- [`task1/src/analysis_correlation.py`](task1/src/analysis_correlation.py): Pearson correlation analysis against life expectancy.
+- [`task1/src/visualization.py`](task1/src/visualization.py): chart and table outputs.
 
----
+Detailed documentation:
 
-## 🎯 Assessment Criteria Addressed
-
-✅ **Functional Requirements**: Task 1 (data analysis) & Task 2 (data structures & algorithms)  
-✅ **Test Coverage**: 252 automated tests (167 + 85) with TDD methodology  
-✅ **Design Principles**: SOLID & DRY principles with documented evidence in both tasks  
-✅ **Code Clarity**: Comprehensive docstrings, type hints, clear structure  
-✅ **Version Control**: Git repository with test files (test_main.py for both tasks)  
-✅ **Documentation**: Complete READMEs with run commands, edge case testing, performance verification
+- [Task 1 README](task1/docs/README.md)
+- [Task 1 Chinese README](task1/docs/README_CN.md)
+- [SOLID analysis](task1/docs/SOLID.md)
+- [DRY analysis](task1/docs/DRY_ANALYSIS.md)
+- [FURPS+ and MoSCoW requirements](task1/docs/FURPS+&MoSCoW.md)
 
 ---
 
-## 👤 Author
+## Task 2: Supermarket Recommendation System
+
+Task 2 builds a recommendation system from supermarket transaction records using graph-based co-occurrence analysis.
+
+Supported analysis:
+
+- Single-item recommendations.
+- Frequent product-pair discovery.
+- Co-purchase frequency checks.
+- Basket-based recommendations.
+- Dynamic graph updates from new transactions.
+- Graph density and performance analysis.
+
+Implementation highlights:
+
+- Adjacency-list graph representation for sparse co-purchase relationships.
+- Heap-based Top-K frequent-pair retrieval.
+- Dependency-injected recommendation engine.
+- Reproducible performance verification script.
+
+Important modules:
+
+- [`task2/src/graph_adjacency_list.py`](task2/src/graph_adjacency_list.py): graph implementation.
+- [`task2/src/recommendation_engine.py`](task2/src/recommendation_engine.py): recommendation logic.
+- [`task2/verify_performance_metrics.py`](task2/verify_performance_metrics.py): benchmark and verification script.
+
+Detailed documentation:
+
+- [Task 2 README](task2/docs/README.md)
+- [Task 2 Chinese README](task2/docs/README_CN.md)
+- [Performance verification](task2/PERFORMANCE_VERIFICATION.txt)
+- [SOLID analysis](task2/docs/SOLID.md)
+- [DRY analysis](task2/docs/DRY_ANALYSIS.md)
+- [FURPS+ and MoSCoW requirements](task2/docs/FURPS+&MoSCoW.md)
+
+---
+
+## Technical Stack
+
+- **Language**: Python
+- **Data handling**: pandas, NumPy, CSV
+- **Database**: SQLite
+- **Visualisation**: Matplotlib
+- **Testing**: pytest
+- **Design practices**: TDD, SOLID, DRY, CLI design, reproducible outputs
+
+---
+
+## Notes
+
+- This repository was submitted for an academic module assessment.
+- Some generated databases, logs, and temporary outputs are intentionally excluded from version control.
+- The included datasets and source outputs are sufficient to understand and run the core workflows.
+
+## Author
 
 **Suhang Liao**  
-Student ID: 5697414
-Email: u5697414@live.warwick.ac.uk
-
----
-
-## 📄 License
-
-This project is submitted as part of the WM9QF-15 Programming for Artificial Intelligence module assessment.
-
----
-
-**For complete documentation, please see [task1/docs/README.md](task1/docs/README.md)**
+MSc Applied Artificial Intelligence, University of Warwick  
+Repository: <https://github.com/HenryLiaoW/PAI_SuhangLiao>

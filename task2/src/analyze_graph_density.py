@@ -19,8 +19,15 @@ Data Structure Recommendation:
 """
 
 import csv
+import sys
 from collections import defaultdict
 from pathlib import Path
+
+project_root = Path(__file__).resolve().parents[2]
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from task2.config import SUPERMARKET_DATASET
 
 
 def analyze_market_basket_graph(csv_path: str):
@@ -161,7 +168,7 @@ def analyze_market_basket_graph(csv_path: str):
 
 def main():
     # Path to dataset
-    csv_path = Path(__file__).parent / "data" / "Supermarket_dataset_PAI.csv"
+    csv_path = SUPERMARKET_DATASET
     
     if not csv_path.exists():
         print(f"❌ ERROR: Dataset not found at {csv_path}")

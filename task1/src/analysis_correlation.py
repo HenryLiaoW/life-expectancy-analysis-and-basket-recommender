@@ -18,6 +18,8 @@ import csv
 import math
 from typing import List, Dict
 
+from task1.config import CLEANED_LIFE_EXPECTANCY_CSV
+
 
 # --------------------------------------------------
 # Utility functions
@@ -63,7 +65,7 @@ def pearson_corr(x_vals, y_vals):
 # Main analysis
 # --------------------------------------------------
 def run_correlation_analysis(
-    cleaned_path: str = "task1/data/life_expectancy_cleaned.csv",
+    cleaned_path: str = str(CLEANED_LIFE_EXPECTANCY_CSV),
 ):
     """
     Compute Pearson correlation between life expectancy and health/socioeconomic factors.

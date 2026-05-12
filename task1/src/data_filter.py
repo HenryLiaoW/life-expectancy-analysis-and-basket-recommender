@@ -60,7 +60,14 @@ def get_data_as_dataframe(db_path: str) -> pd.DataFrame:
         raise FileNotFoundError(f"Database not found: {db_path}")
     
     records = database_loader.get_all_records(db_path)
-    return pd.DataFrame(records)
+    df = pd.DataFrame(records)
+
+    # Keep text columns as plain object dtype for stable behaviour across pandas versions.
+    for column in ("country", "country_code", "region"):
+        if column in df.columns:
+            df[column] = df[column].astype(object)
+
+    return df
 
 
 def get_country_list(db_path: str) -> List[str]:

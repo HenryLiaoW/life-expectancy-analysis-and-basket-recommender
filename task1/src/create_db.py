@@ -9,9 +9,15 @@ import os
 import sys
 
 # Add project root to path
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, project_root)
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
+from task1.config import (
+    RAW_LIFE_EXPECTANCY_CSV,
+    FULL_DATABASE,
+    DEMO_DATABASE,
+)
 from task1.src.database_loader import create_database, load_data_to_db
 from task1.src.data_loader import load_csv
 from task1.src.cleaner import clean_dataset
@@ -77,13 +83,13 @@ def main():
     parser = argparse.ArgumentParser(description="Create database from CSV file")
     parser.add_argument(
         "--csv", 
-        default="task1/data/life_expectancy.csv",
-        help="Path to CSV file (default: task1/data/life_expectancy.csv)"
+        default=str(RAW_LIFE_EXPECTANCY_CSV),
+        help=f"Path to CSV file (default: {RAW_LIFE_EXPECTANCY_CSV})"
     )
     parser.add_argument(
         "--db",
-        default="task1/data/life_expectancy.db",
-        help="Output database path (default: task1/data/life_expectancy.db)"
+        default=str(FULL_DATABASE),
+        help=f"Output database path (default: {FULL_DATABASE})"
     )
     parser.add_argument(
         "--demo",
@@ -102,7 +108,7 @@ def main():
         # Create demo database
         db_path = create_db_from_csv(
             csv_path=None,
-            db_path="task1/data/CLI_demo.db",
+            db_path=str(DEMO_DATABASE),
             use_demo_data=True
         )
         print("\n💡 Usage:")

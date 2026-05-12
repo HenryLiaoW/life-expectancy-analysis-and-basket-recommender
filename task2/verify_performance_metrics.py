@@ -18,6 +18,14 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from task2.config import (
+    SUPERMARKET_DATASET,
+    PERFORMANCE_REPORT,
+    DEFAULT_PAIR_TOP_K,
+    QUERY_BENCHMARK_RUNS,
+    QUERY_BENCHMARK_ITERATIONS,
+    QUERY_WARMUP_ITERATIONS,
+)
 from task2.src.graph_adjacency_list import GraphAdjacencyList
 
 
@@ -33,7 +41,7 @@ def measure_graph_statistics():
     print_section("STEP 1: Graph Statistics & Load Time")
     
     graph = GraphAdjacencyList()
-    csv_path = Path(__file__).parent / "data" / "Supermarket_dataset_PAI.csv"
+    csv_path = SUPERMARKET_DATASET
     
     start = time.time()
     graph.build_from_csv(str(csv_path))
@@ -92,18 +100,18 @@ def measure_query_latency(graph):
     
     # Warm-up runs
     print("Warming up...")
-    for _ in range(100):
-        graph.get_top_neighbors('whole milk', 10)
+    for _ in range(QUERY_WARMUP_ITERATIONS):
+        graph.get_top_neighbors('whole milk', DEFAULT_PAIR_TOP_K)
     
     # Multiple measurement runs for accuracy
     print("Running 5 measurement iterations...")
     measurements = []
-    for run in range(5):
+    for run in range(QUERY_BENCHMARK_RUNS):
         start = time.perf_counter()
-        for _ in range(1000):
-            graph.get_top_neighbors('whole milk', 10)
+        for _ in range(QUERY_BENCHMARK_ITERATIONS):
+            graph.get_top_neighbors('whole milk', DEFAULT_PAIR_TOP_K)
         elapsed = time.perf_counter() - start
-        latency_us = elapsed * 1000000 / 1000
+        latency_us = elapsed * 1_000_000 / QUERY_BENCHMARK_ITERATIONS
         measurements.append(latency_us)
         print(f"  Run {run+1}: {latency_us:.2f}μs")
     
@@ -116,7 +124,7 @@ def measure_query_latency(graph):
     return avg_latency
 
 
-def calculate_theoretical_operations(V, E, k=10):
+def calculate_theoretical_operations(V, E, k=DEFAULT_PAIR_TOP_K):
     """Calculate theoretical operation counts based on complexity analysis"""
     print_section("STEP 4: Theoretical Operation Counts")
     
@@ -185,7 +193,7 @@ def generate_report_summary(V, E, test_count, exec_time, query_latency, heap_ops
     print(f'tests execute in {exec_time:.2f} seconds."')
     
     # Save to file
-    output_file = Path(__file__).parent / "PERFORMANCE_VERIFICATION.txt"
+    output_file = PERFORMANCE_REPORT
     with open(output_file, 'w') as f:
         f.write("=" * 70 + "\n")
         f.write("  PERFORMANCE METRICS VERIFICATION RESULTS\n")

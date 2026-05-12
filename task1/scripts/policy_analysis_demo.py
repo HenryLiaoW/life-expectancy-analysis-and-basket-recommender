@@ -18,6 +18,7 @@ import os
 # Ensure task1 module can be imported
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from task1.config import FULL_DATABASE, DEFAULT_POLICY_TARGET_LIFE_EXPECTANCY
 from task1.src.data_filter import (
     get_data_as_dataframe,
     filter_by_region,
@@ -46,7 +47,7 @@ def print_subsection(title, width=80):
 
 def main():
     # Use real database
-    db_path = "task1/data/life_expectancy.db"
+    db_path = str(FULL_DATABASE)
     
     print_section("Policy Analysis Demonstration: Health Intervention Decision Support System")
     print("\n📌 System Goal: Provide data-driven decision support for public health policymakers")
@@ -171,7 +172,7 @@ def main():
         india_priorities = get_policy_intervention_priorities(
             df,  # Use complete dataset
             country="India",
-            target_life_expectancy=75.0
+            target_life_expectancy=DEFAULT_POLICY_TARGET_LIFE_EXPECTANCY
         )
         print(f"\nCurrent: {india_priorities['current_life_expectancy']:.1f} years")
         print(f"Target: {india_priorities['target_life_expectancy']:.1f} years")

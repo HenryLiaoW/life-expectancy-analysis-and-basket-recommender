@@ -14,6 +14,7 @@ in cleaner.py, matching good modular design practices.
 import csv
 import os
 
+from task1.config import RAW_LIFE_EXPECTANCY_CSV, CLEANED_LIFE_EXPECTANCY_CSV
 from task1.src.data_loader import load_csv
 from task1.src.cleaner import clean_row
 
@@ -90,8 +91,8 @@ def summarise_missing_values(cleaned_rows):
 # Main export function — orchestration layer only
 # --------------------------------------------------------------------
 def export_cleaned_dataset(
-    input_path: str = "task1/data/life_expectancy.csv",
-    output_path: str = "task1/data/life_expectancy_cleaned.csv",
+    input_path: str = str(RAW_LIFE_EXPECTANCY_CSV),
+    output_path: str = str(CLEANED_LIFE_EXPECTANCY_CSV),
 ):
     """
     Execute the complete data cleaning pipeline from raw CSV to cleaned CSV.

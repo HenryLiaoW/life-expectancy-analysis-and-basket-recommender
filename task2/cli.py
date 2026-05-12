@@ -11,6 +11,14 @@ Usage:
 """
 
 from pathlib import Path
+from task2.config import (
+    SUPERMARKET_DATASET,
+    DEFAULT_RECOMMENDATION_TOP_K,
+    DEFAULT_PAIR_TOP_K,
+    DEFAULT_CO_PURCHASE_THRESHOLD,
+    DEFAULT_DOT_FILENAME,
+    DEFAULT_MAX_DOT_EDGES,
+)
 from task2.src.recommendation_engine import RecommendationEngine
 
 
@@ -26,7 +34,7 @@ class SupermarketCLI:
         """Initialize CLI with recommendation engine"""
         self.engine = RecommendationEngine()
         self.data_loaded = False
-        self.dataset_path = Path(__file__).parent / "data" / "Supermarket_dataset_PAI.csv"
+        self.dataset_path = SUPERMARKET_DATASET
         
     def display_header(self):
         """Display application header with styling"""
@@ -101,7 +109,7 @@ class SupermarketCLI:
             return
             
         try:
-            k = int(input("Number of recommendations (default 5): ").strip() or "5")
+            k = int(input(f"Number of recommendations (default {DEFAULT_RECOMMENDATION_TOP_K}): ").strip() or str(DEFAULT_RECOMMENDATION_TOP_K))
             if k <= 0:
                 print("❌ Number must be positive")
                 return
@@ -146,7 +154,7 @@ class SupermarketCLI:
         print("\n--- MOST FREQUENT PRODUCT PAIRS ---")
         
         try:
-            k = int(input("Number of pairs to display (default 10): ").strip() or "10")
+            k = int(input(f"Number of pairs to display (default {DEFAULT_PAIR_TOP_K}): ").strip() or str(DEFAULT_PAIR_TOP_K))
             if k <= 0:
                 print("❌ Number must be positive")
                 return
@@ -187,7 +195,7 @@ class SupermarketCLI:
             return
             
         try:
-            threshold = int(input("Frequency threshold (default 50): ").strip() or "50")
+            threshold = int(input(f"Frequency threshold (default {DEFAULT_CO_PURCHASE_THRESHOLD}): ").strip() or str(DEFAULT_CO_PURCHASE_THRESHOLD))
             if threshold < 0:
                 print("❌ Threshold must be non-negative")
                 return
@@ -240,7 +248,7 @@ class SupermarketCLI:
             return
             
         try:
-            k = int(input("Number of recommendations (default 5): ").strip() or "5")
+            k = int(input(f"Number of recommendations (default {DEFAULT_RECOMMENDATION_TOP_K}): ").strip() or str(DEFAULT_RECOMMENDATION_TOP_K))
             if k <= 0:
                 print("❌ Number must be positive")
                 return
@@ -302,7 +310,7 @@ class SupermarketCLI:
         # Show recommendation impact
         if len(items) >= 1:
             print(f"\n📈 Updated recommendations for '{items[0]}':")
-            recommendations = self.engine.recommend_for_item(items[0], top_k=5)
+            recommendations = self.engine.recommend_for_item(items[0], top_k=DEFAULT_RECOMMENDATION_TOP_K)
             for rank, (product, count) in enumerate(recommendations, 1):
                 print(f"   {rank}. {product} (count: {count})")
                 
@@ -358,7 +366,7 @@ class SupermarketCLI:
                 return
             
             try:
-                max_neighbors = int(input("Max neighbors to show (default 10): ").strip() or "10")
+                max_neighbors = int(input(f"Max neighbors to show (default {DEFAULT_PAIR_TOP_K}): ").strip() or str(DEFAULT_PAIR_TOP_K))
                 if max_neighbors <= 0:
                     print("❌ Number must be positive")
                     return
@@ -371,10 +379,10 @@ class SupermarketCLI:
             
         elif choice == '2':
             # Export to DOT format
-            output_file = input("\nOutput filename (default: graph.dot): ").strip() or "graph.dot"
+            output_file = input(f"\nOutput filename (default: {DEFAULT_DOT_FILENAME}): ").strip() or DEFAULT_DOT_FILENAME
             
             try:
-                max_edges = int(input("Max edges to export (0=all, default 100): ").strip() or "100")
+                max_edges = int(input(f"Max edges to export (0=all, default {DEFAULT_MAX_DOT_EDGES}): ").strip() or str(DEFAULT_MAX_DOT_EDGES))
                 if max_edges < 0:
                     print("❌ Number cannot be negative")
                     return
